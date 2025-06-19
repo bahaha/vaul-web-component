@@ -14,8 +14,12 @@ This is a TypeScript library built with Vite and uses Bun as the package manager
 
 ### Testing
 
--   `bun run test` - Run tests with Vitest
--   `bun run test:coverage` - Run tests with coverage report
+-   `bun run test` - Run unit tests with Vitest
+-   `bun run test:coverage` - Run unit tests with coverage report
+-   `bun run test:e2e` - Run end-to-end tests with Playwright
+-   `bun run test:e2e-ui` - Run Playwright tests with UI mode
+-   `bun run test:e2e-headed` - Run Playwright tests in headed mode (visible browser)
+-   `bun run test:all` - Run both unit and e2e tests
 
 ### Development
 
@@ -53,9 +57,11 @@ This is a TypeScript library starter template with the following structure:
 
 ### Testing
 
--   **Vitest**: Configured with jsdom environment for DOM testing
--   Test files: `test/` directory with `.test.ts` extension
--   Global test utilities enabled
+-   **Vitest**: Unit testing with jsdom environment for DOM testing
+-   **Playwright**: End-to-end testing with cross-browser support (Chrome, Firefox, Safari, Mobile)
+-   Unit test files: `test/` directory with `.test.ts` extension
+-   E2E test files: `e2e/` directory with `.spec.ts` extension
+-   Test server: Automatically starts Vite dev server for e2e tests
 
 ### Important Files to Update
 

@@ -4,10 +4,82 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Vite App</title>
+        <title>Vaul Web Component Demo</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#3b82f6",
+                            secondary: "#1f2937",
+                        },
+                    },
+                },
+            };
+        </script>
     </head>
-    <body>
-        <div id="app"></div>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Vaul Web Component</h1>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    A customizable drawer web component inspired by
+                    <a
+                        href="https://github.com/emilkowalski/vaul"
+                        class="text-blue-600 hover:text-blue-800 underline"
+                        target="_blank"
+                        >Vaul</a
+                    >. Built with TypeScript and Web Components.
+                </p>
+                <p class="text-sm text-gray-500 mt-4">
+                    <strong>Baseline Implementation:</strong> Currently showing simple text components as a foundation.
+                </p>
+            </header>
+
+            <div class="space-y-8">
+                <!-- Component Showcase -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Component Showcase</h2>
+                    <p class="text-gray-600 mb-6">Basic "Hello World" web components as a starting foundation.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Basic Components -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-gray-800">Hello World Components</h3>
+
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600">Vaul Drawer Component:</p>
+                                <vaul-drawer></vaul-drawer>
+                            </div>
+
+                            <div class="space-y-2">
+                                <p class="text-sm text-gray-600">Vaul Trigger Component:</p>
+                                <vaul-drawer-trigger></vaul-drawer-trigger>
+                            </div>
+                        </div>
+
+                        <!-- Multiple Instances -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-medium text-gray-800">Multiple Instances</h3>
+
+                            <div class="space-y-3">
+                                <vaul-drawer></vaul-drawer>
+                                <vaul-drawer></vaul-drawer>
+                                <vaul-drawer-trigger></vaul-drawer-trigger>
+                                <vaul-drawer-trigger></vaul-drawer-trigger>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script type="module" src="/src/index.ts"></script>
+        <script>
+            // Simple demo script for baseline components
+            console.log("Vaul Web Component Demo - Baseline Implementation");
+            console.log("Components loaded and ready for interaction");
+        </script>
     </body>
 </html>
