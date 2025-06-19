@@ -39,7 +39,33 @@ This is a TypeScript library built with Vite and uses Bun as the package manager
 
 ## Architecture
 
-This is a TypeScript library starter template with the following structure:
+This is a TypeScript library for a web component drawer system with the following tech stack and structure:
+
+### Tech Stack
+
+-   **Web Components**: Custom elements using HTMLElement base class with Shadow DOM
+-   **State Management**: @preact/signals for reactive state management (planned)
+-   **Dialog Implementation**: Native HTML `<dialog>` element for drawer content
+-   **Shadow DOM**: Encapsulated styling and slot-based content projection
+-   **Component Communication**: Uses `closest()` pattern for parent-child communication
+
+### Component Structure
+
+-   **VaulDrawer**: Container component that manages dialog reference and coordinates child components
+-   **VaulDrawerTrigger**: Clickable element with slot content and click event handling
+-   **VaulDrawerContent**: Drawer content wrapper using native `<dialog>` element in shadow DOM
+
+### Coding Preferences
+
+-   **Private Fields**: Use `#` prefix instead of `private` keyword for class members
+-   **External CSS**: Use separate CSS files with Vite raw imports (`?raw`) instead of inline styles
+-   **Shadow DOM**: All components use `attachShadow({ mode: "open" })` with slot-based content projection
+-   **Logging**: Use injectable logger system (`logger.debug()`, `logger.error()`) instead of direct console calls
+-   **Event Cleanup**: Always implement `disconnectedCallback()` to remove event listeners
+-   **No Comments**: Avoid adding code comments unless explicitly requested
+-   **Testing**: Write comprehensive unit tests (Vitest) and e2e tests (Playwright) for all features
+
+### Library Template Structure
 
 ### Build System
 

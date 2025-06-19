@@ -96,5 +96,8 @@
         "upgradeps": "^2.0.6",
         "vite": "^5.0.12",
         "vitest": "^1.2.1"
+    },
+    "dependencies": {
+        "@preact/signals": "^2.2.0"
     }
 }
