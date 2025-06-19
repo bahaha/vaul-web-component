@@ -60,10 +60,15 @@ This is a TypeScript library for a web component drawer system with the followin
 -   **Private Fields**: Use `#` prefix instead of `private` keyword for class members
 -   **External CSS**: Use separate CSS files with Vite raw imports (`?raw`) instead of inline styles
 -   **Shadow DOM**: All components use `attachShadow({ mode: "open" })` with slot-based content projection
--   **Logging**: Use injectable logger system (`logger.debug()`, `logger.error()`) instead of direct console calls
+-   **Logging**: Use injectable logger system, only log user-facing errors/warnings, avoid verbose debug logs
 -   **Event Cleanup**: Always implement `disconnectedCallback()` to remove event listeners
 -   **No Comments**: Avoid adding code comments unless explicitly requested
--   **Testing**: Write comprehensive unit tests (Vitest) and e2e tests (Playwright) for all features
+-   **Constant Arrays**: Use `as const` for readonly constant arrays instead of explicit type annotations
+-   **Early Returns**: Use early return patterns instead of nested if-else blocks
+-   **Generic Naming**: Use generic function names that can handle multiple attributes/operations
+-   **Explicit CSS**: Use explicit CSS properties instead of shorthand (e.g., `margin-top: 0` not `margin: 0 auto auto auto`)
+-   **CSS Variables**: Define CSS custom properties in `:host` with default values
+-   **Modern CSS**: Use CSS nesting and modern selectors where appropriate
 
 ### Library Template Structure
 
@@ -85,7 +90,12 @@ This is a TypeScript library for a web component drawer system with the followin
 
 -   **Vitest**: Unit testing with jsdom environment for DOM testing
 -   **Playwright**: End-to-end testing with cross-browser support (Chrome, Firefox, Safari, Mobile)
--   Unit test files: `test/` directory with `.test.ts` extension
+-   **Test Organization**: Co-locate unit tests alongside source files (e.g., `src/feature.test.ts`)
+-   **Test Focus**: Unit tests focus on business logic only, e2e tests handle UI/visual behavior
+-   **Test Templates**: Use `innerHTML` with template literals instead of `createElement` for cleaner test setup
+-   **Test Naming**: Use feature-based naming (e.g., `drawer-direction.test.ts`, `drawer-context.test.ts`)
+-   **Minimal Tests**: Keep unit tests minimal and focused, avoid verbose/redundant test cases
+-   **DOM API**: Use modern DOM APIs like `element.dataset.property` instead of `getAttribute('data-property')`
 -   E2E test files: `e2e/` directory with `.spec.ts` extension
 -   Test server: Automatically starts Vite dev server for e2e tests
 

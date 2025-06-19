@@ -2,18 +2,31 @@ import drawerStyles from "./styles/vaul-drawer.css?raw";
 import triggerStyles from "./styles/vaul-drawer-trigger.css?raw";
 import contentStyles from "./styles/vaul-drawer-content.css?raw";
 import { logger } from "./logger";
+import { signal, effect } from "@preact/signals";
+
+type Direction = "top" | "bottom" | "left" | "right";
 
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
+    #direction = signal<Direction>("bottom");
 
     constructor() {
         super();
-        logger.debug("VaulDrawer: constructor");
     }
 
     connectedCallback() {
-        logger.debug("VaulDrawer: connectedCallback");
         this.#render();
+        this.#updateDirection();
+    }
+
+    static get observedAttributes() {
+        return ["direction"];
+    }
+
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        if (name === "direction" && oldValue !== newValue) {
+            this.#updateDirection();
+        }
     }
 
     #render() {
@@ -25,10 +38,27 @@ export class VaulDrawer extends HTMLElement {
         shadow.appendChild(slot);
     }
 
+    #updateDirection() {
+        const directionAttr = this.getAttribute("direction");
+        const validDirections = ["top", "bottom", "left", "right"] as const;
+
+        if (!directionAttr || !validDirections.includes(directionAttr as Direction)) {
+            if (directionAttr) {
+                logger.warn(`VaulDrawer: invalid direction "${directionAttr}", defaulting to "bottom"`);
+            }
+            this.#direction.value = "bottom";
+            return;
+        }
+
+        this.#direction.value = directionAttr as Direction;
+    }
+
+    get direction() {
+        return this.#direction;
+    }
+
     get dialogRef() {
-        logger.debug("VaulDrawer: dialogRef accessed");
         if (!this.#dialogRef) {
-            logger.debug("VaulDrawer: dialogRef not cached, looking for content");
             const content = this.querySelector("vaul-drawer-content") as VaulDrawerContent;
             if (!content) {
                 logger.error(
@@ -37,7 +67,6 @@ export class VaulDrawer extends HTMLElement {
                 return undefined;
             }
             this.#dialogRef = content.dialog;
-            logger.debug("VaulDrawer: dialogRef cached successfully");
         }
         return this.#dialogRef;
     }
@@ -48,21 +77,16 @@ export class VaulDrawerTrigger extends HTMLElement {
 
     constructor() {
         super();
-        logger.debug("VaulDrawerTrigger: constructor");
         this.#boundHandleClick = this.#handleClick.bind(this);
     }
 
     connectedCallback() {
-        logger.debug("VaulDrawerTrigger: connectedCallback");
         this.#render();
         this.addEventListener("click", this.#boundHandleClick);
-        logger.debug("VaulDrawerTrigger: click listener added");
     }
 
     disconnectedCallback() {
-        logger.debug("VaulDrawerTrigger: disconnectedCallback");
         this.removeEventListener("click", this.#boundHandleClick);
-        logger.debug("VaulDrawerTrigger: click listener removed");
     }
 
     #render() {
@@ -75,16 +99,13 @@ export class VaulDrawerTrigger extends HTMLElement {
     }
 
     #handleClick() {
-        logger.debug("VaulDrawerTrigger: click event triggered");
         const drawer = this.closest("vaul-drawer") as VaulDrawer;
         if (!drawer) {
             logger.warn("VaulDrawerTrigger: No parent vaul-drawer found");
             return;
         }
-        logger.debug("VaulDrawerTrigger: found parent drawer, accessing dialogRef");
         const dialogRef = drawer.dialogRef;
         if (dialogRef) {
-            logger.debug("VaulDrawerTrigger: showing modal");
             dialogRef.showModal();
         } else {
             logger.warn("VaulDrawerTrigger: dialogRef not available");
@@ -94,33 +115,48 @@ export class VaulDrawerTrigger extends HTMLElement {
 
 export class VaulDrawerContent extends HTMLElement {
     #dialog!: HTMLDialogElement;
+    #drawer?: VaulDrawer;
 
     constructor() {
         super();
-        logger.debug("VaulDrawerContent: constructor");
     }
 
     connectedCallback() {
-        logger.debug("VaulDrawerContent: connectedCallback");
         this.#render();
+        this.#setupDrawerRef();
+        this.#bindDrawerAttributes();
+    }
+
+    #setupDrawerRef() {
+        this.#drawer = this.closest("vaul-drawer") as VaulDrawer;
+        if (!this.#drawer) {
+            logger.warn("VaulDrawerContent: No parent vaul-drawer found");
+            return;
+        }
+    }
+
+    #bindDrawerAttributes() {
+        if (!this.#drawer) return;
+
+        const direction = this.#drawer.direction;
+
+        effect(() => {
+            this.#dialog.setAttribute("data-direction", direction.value);
+        });
     }
 
     #render() {
-        logger.debug("VaulDrawerContent: rendering with shadow DOM");
         const shadow = this.attachShadow({ mode: "open" });
         const style = document.createElement("style");
         style.textContent = contentStyles;
         this.#dialog = document.createElement("dialog");
-        logger.debug("VaulDrawerContent: dialog element created");
         const slot = document.createElement("slot");
         shadow.appendChild(style);
         shadow.appendChild(this.#dialog);
         this.#dialog.appendChild(slot);
-        logger.debug("VaulDrawerContent: render complete");
     }
 
     get dialog() {
-        logger.debug("VaulDrawerContent: dialog getter accessed");
         return this.#dialog;
     }
 }
