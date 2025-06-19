@@ -106,3 +106,14 @@ When adapting this template:
 1. `package.json` - Update name, author, repository, description
 2. `dts-bundle-generator.config.ts` - Update `outFile` to match package name
 3. Both configs use package.json name for consistent file naming
+
+## GitHub Project Labels
+
+-   `feature`: New feature to be implemented
+-   `animation`: Related to animations or transitions
+-   `bug`: Indicates a problem or error
+-   `documentation`: Related to documentation
+-   `duplicate`: Issue or pull request already exists
+-   `enhancement`: New feature or request
+-   `question`: Further information is requested
+-   `wontfix`: Issue will not be worked on
