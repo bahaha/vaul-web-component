@@ -44,7 +44,7 @@ export class VaulDrawer extends HTMLElement {
 }
 
 export class VaulDrawerTrigger extends HTMLElement {
-    #boundHandleClick;
+    #boundHandleClick: () => void;
 
     constructor() {
         super();

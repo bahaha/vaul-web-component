@@ -112,7 +112,7 @@ describe("VaulDrawer Components", () => {
 
             // Mock showModal method - dialog might not exist in jsdom
             const dialog = content.dialog;
-            if (dialog && dialog.showModal) {
+            if (dialog?.showModal) {
                 const showModalSpy = vi.spyOn(dialog, "showModal").mockImplementation(() => {});
 
                 // Click the trigger
