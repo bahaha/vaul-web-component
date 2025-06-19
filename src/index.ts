@@ -1,2 +1,3 @@
-export { VaulDrawer } from "./vaul-drawer";
-export { VaulDrawerTrigger } from "./vaul-drawer-trigger";
+export { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent } from "./components";
+export { setLogger, logger, noopLogger, consoleLogger } from "./logger";
+export type { Logger } from "./logger";

@@ -33,42 +33,52 @@
                     >. Built with TypeScript and Web Components.
                 </p>
                 <p class="text-sm text-gray-500 mt-4">
-                    <strong>Baseline Implementation:</strong> Currently showing simple text components as a foundation.
+                    <strong>Milestone 1:</strong> Basic drawer structure with trigger and content components.
                 </p>
             </header>
 
             <div class="space-y-8">
                 <!-- Component Showcase -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Component Showcase</h2>
-                    <p class="text-gray-600 mb-6">Basic "Hello World" web components as a starting foundation.</p>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Milestone 1: Basic Drawer Structure</h2>
+                    <p class="text-gray-600 mb-6">Testing the basic drawer structure with nested components.</p>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <!-- Basic Components -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-800">Hello World Components</h3>
-
-                            <div class="space-y-2">
-                                <p class="text-sm text-gray-600">Vaul Drawer Component:</p>
-                                <vaul-drawer></vaul-drawer>
-                            </div>
-
-                            <div class="space-y-2">
-                                <p class="text-sm text-gray-600">Vaul Trigger Component:</p>
-                                <vaul-drawer-trigger></vaul-drawer-trigger>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Default Styling -->
+                        <div class="p-4 border border-gray-200 rounded-md">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Default Styling</h4>
+                            <vaul-drawer>
+                                <vaul-drawer-trigger> Open Default Drawer </vaul-drawer-trigger>
+                                <vaul-drawer-content>
+                                    <h4>Default Drawer</h4>
+                                    <p>This drawer uses default component styling.</p>
+                                </vaul-drawer-content>
+                            </vaul-drawer>
                         </div>
 
-                        <!-- Multiple Instances -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-medium text-gray-800">Multiple Instances</h3>
-
-                            <div class="space-y-3">
-                                <vaul-drawer></vaul-drawer>
-                                <vaul-drawer></vaul-drawer>
-                                <vaul-drawer-trigger></vaul-drawer-trigger>
-                                <vaul-drawer-trigger></vaul-drawer-trigger>
-                            </div>
+                        <!-- Custom TailwindCSS Styling -->
+                        <div class="p-4 border border-gray-200 rounded-md">
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Custom TailwindCSS Styling</h4>
+                            <vaul-drawer class="custom-drawer">
+                                <vaul-drawer-trigger
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    Open Styled Drawer
+                                </vaul-drawer-trigger>
+                                <vaul-drawer-content class="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                                    <div class="p-6">
+                                        <h4 class="text-xl font-bold mb-3">🎨 Styled Drawer</h4>
+                                        <p class="text-purple-100">
+                                            This drawer has custom TailwindCSS styling applied!
+                                        </p>
+                                        <div class="mt-4 space-y-2">
+                                            <p class="text-sm">✨ Custom background gradient</p>
+                                            <p class="text-sm">🎯 Styled trigger button</p>
+                                            <p class="text-sm">🎪 White text on colorful background</p>
+                                        </div>
+                                    </div>
+                                </vaul-drawer-content>
+                            </vaul-drawer>
                         </div>
                     </div>
                 </div>
@@ -77,9 +87,9 @@
 
         <script type="module" src="/src/index.ts"></script>
         <script>
-            // Simple demo script for baseline components
-            console.log("Vaul Web Component Demo - Baseline Implementation");
-            console.log("Components loaded and ready for interaction");
+            // Demo script for milestone 1
+            console.log("Vaul Web Component Demo - Milestone 1");
+            console.log("Testing basic drawer structure with nested components");
         </script>
     </body>
 </html>

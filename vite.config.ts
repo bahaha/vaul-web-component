@@ -37,6 +37,9 @@ export default defineConfig({
             keep_fnames: true,
         },
     },
+    define: {
+        __DEV__: JSON.stringify(process.env.NODE_ENV !== "production"),
+    },
     test: {
         globals: true,
         environment: "jsdom",
