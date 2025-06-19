@@ -1,0 +1,5 @@
+{
+    "src/**/*.{ts,js}": ["bun run lint", "bun run format"],
+    "test/**/*.{ts,js}": ["bun run lint", "bun run format"],
+    "*.{ts,js,json,md}": "bun run format"
+}

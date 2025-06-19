@@ -1,0 +1,95 @@
+{
+    "name": "vaul-web-component",
+    "version": "0.1.0",
+    "author": {
+        "name": "Clay Cheng",
+        "email": "devclaycheng@gmail.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bahaha/vaul-web-component.git"
+    },
+    "main": "./dist/vaul-web-component.esm.js",
+    "module": "./dist/vaul-web-component.esm.js",
+    "exports": {
+        ".": {
+            "import": "./dist/vaul-web-component.esm.js",
+            "types": "./dist/vaul-web-component.d.ts"
+        }
+    },
+    "scripts": {
+        "dev": "vite --host",
+        "prebuild": "rm -rf dist/*",
+        "build": "tsc && vite build",
+        "postbuild": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage",
+        "lint": "oxlint src test",
+        "lint:fix": "oxlint src test --fix",
+        "format": "prettier . --write",
+        "format:check": "prettier . --check",
+        "check": "bun run lint && bun run format:check && bun run test",
+        "upgrade": "upgradeps",
+        "release": "npm run build && np",
+        "prepare": "husky"
+    },
+    "bugs": {
+        "url": "https://github.com/bahaha/vaul-web-component/issues"
+    },
+    "description": "A customizable drawer web component inspired by Vaul (https://github.com/emilkowalski/vaul).",
+    "files": [
+        "dist",
+        "README.md",
+        "LICENSE.md",
+        "CHANGELOG.md",
+        "src",
+        "package.json"
+    ],
+    "funding": [
+        {
+            "type": "individual",
+            "url": "https://support.example.com"
+        }
+    ],
+    "homepage": "https://github.com/bahaha/vaul-web-component#readme",
+    "keywords": [
+        "web-component",
+        "drawer",
+        "vaul",
+        "ui",
+        "typescript"
+    ],
+    "license": "MIT",
+    "private": false,
+    "sponsor": {
+        "url": "https://sponsor.example.com"
+    },
+    "type": "module",
+    "types": "./dist/vaul-web-component.d.ts",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/vaul-web-component.d.ts"
+            ]
+        }
+    },
+    "typings": "./dist/vaul-web-component.d.ts",
+    "devDependencies": {
+        "@types/jsdom": "^21.1.6",
+        "@types/node": "^20.11.5",
+        "@vitest/coverage-v8": "^1.2.1",
+        "dts-bundle-generator": "^9.2.4",
+        "husky": "^9.1.7",
+        "jsdom": "^24.1.0",
+        "lint-staged": "^15.2.0",
+        "np": "^10.0.6",
+        "oxlint": "^1.2.0",
+        "prettier": "^3.2.4",
+        "terser": "^5.31.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3",
+        "upgradeps": "^2.0.6",
+        "vite": "^5.0.12",
+        "vitest": "^1.2.1"
+    }
+}
