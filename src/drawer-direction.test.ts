@@ -19,8 +19,7 @@ describe("drawer-direction", () => {
         container.innerHTML = `<vaul-drawer></vaul-drawer>`;
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        expect(drawer.direction).toBeDefined();
-        expect(drawer.direction.value).toBe("bottom");
+        expect(drawer.direction).toBe("bottom");
     });
 
     it("should add data-direction data attribute in vaul-drawer-content", async () => {
@@ -41,14 +40,14 @@ describe("drawer-direction", () => {
         container.innerHTML = `<vaul-drawer></vaul-drawer>`;
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        expect(drawer.direction.value).toBe("bottom");
+        expect(drawer.direction).toBe("bottom");
     });
 
     it("should have fallback direction as bottom", () => {
         container.innerHTML = `<vaul-drawer direction="invalid"></vaul-drawer>`;
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        expect(drawer.direction.value).toBe("bottom");
+        expect(drawer.direction).toBe("bottom");
     });
 
     it("should be case-insensitive of direction", () => {
@@ -59,7 +58,7 @@ describe("drawer-direction", () => {
 
         caseVariations.forEach(input => {
             drawer.setAttribute("direction", input);
-            expect(drawer.direction.value).toBe("bottom");
+            expect(drawer.direction).toBe("bottom");
         });
     });
 

@@ -9,6 +9,7 @@ type Direction = "top" | "bottom" | "left" | "right";
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
     #direction = signal<Direction>("bottom");
+    #open = signal<boolean>(false);
 
     constructor() {
         super();
@@ -46,15 +47,29 @@ export class VaulDrawer extends HTMLElement {
             if (directionAttr) {
                 logger.warn(`VaulDrawer: invalid direction "${directionAttr}", defaulting to "bottom"`);
             }
-            this.#direction.value = "bottom";
+            this.direction = "bottom";
             return;
         }
 
-        this.#direction.value = directionAttr as Direction;
+        this.direction = directionAttr as Direction;
     }
 
     get direction() {
-        return this.#direction;
+        return this.#direction.value;
+    }
+
+    set direction(direction: Direction) {
+        this.#direction.value = direction;
+    }
+
+    get open() {
+        return this.#open.value;
+    }
+
+    set open(value: boolean) {
+        this.#open.value = value;
+        if (!this.dialogRef) return;
+        if (value) this.dialogRef.showModal();
     }
 
     get dialogRef() {
@@ -73,20 +88,17 @@ export class VaulDrawer extends HTMLElement {
 }
 
 export class VaulDrawerTrigger extends HTMLElement {
-    #boundHandleClick: () => void;
-
     constructor() {
         super();
-        this.#boundHandleClick = this.#handleClick.bind(this);
     }
 
     connectedCallback() {
         this.#render();
-        this.addEventListener("click", this.#boundHandleClick);
+        this.addEventListener("click", this.#handleClick);
     }
 
     disconnectedCallback() {
-        this.removeEventListener("click", this.#boundHandleClick);
+        this.removeEventListener("click", this.#handleClick);
     }
 
     #render() {
@@ -98,24 +110,19 @@ export class VaulDrawerTrigger extends HTMLElement {
         shadow.appendChild(slot);
     }
 
-    #handleClick() {
+    #handleClick = () => {
         const drawer = this.closest("vaul-drawer") as VaulDrawer;
         if (!drawer) {
             logger.warn("VaulDrawerTrigger: No parent vaul-drawer found");
             return;
         }
-        const dialogRef = drawer.dialogRef;
-        if (dialogRef) {
-            dialogRef.showModal();
-        } else {
-            logger.warn("VaulDrawerTrigger: dialogRef not available");
-        }
-    }
+        drawer.open = true;
+    };
 }
 
 export class VaulDrawerContent extends HTMLElement {
-    #dialog!: HTMLDialogElement;
     #drawer?: VaulDrawer;
+    dialog!: HTMLDialogElement;
 
     constructor() {
         super();
@@ -125,6 +132,13 @@ export class VaulDrawerContent extends HTMLElement {
         this.#render();
         this.#setupDrawerRef();
         this.#bindDrawerAttributes();
+        this.#setupAnimationListeners();
+    }
+
+    disconnectedCallback() {
+        this.dialog?.removeEventListener("animationend", this.#handleAnimationEnd);
+        this.dialog?.removeEventListener("animationcancel", this.#handleAnimationCancel);
+        this.dialog?.removeEventListener("cancel", this.#handleCancel);
     }
 
     #setupDrawerRef() {
@@ -138,26 +152,46 @@ export class VaulDrawerContent extends HTMLElement {
     #bindDrawerAttributes() {
         if (!this.#drawer) return;
 
-        const direction = this.#drawer.direction;
-
-        effect(() => {
-            this.#dialog.setAttribute("data-direction", direction.value);
-        });
+        effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction));
+        effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed"));
     }
+
+    #setupAnimationListeners() {
+        this.dialog.addEventListener("animationend", this.#handleAnimationEnd);
+        this.dialog.addEventListener("animationcancel", this.#handleAnimationCancel);
+        this.dialog.addEventListener("cancel", this.#handleCancel);
+    }
+
+    #handleAnimationEnd = (event: AnimationEvent) => {
+        if (event.target !== this.dialog || !this.#drawer) return;
+
+        if (event.animationName.startsWith("slide-to-")) {
+            this.dialog.close();
+        }
+    };
+
+    #handleAnimationCancel = (event: AnimationEvent) => {
+        if (event.target !== this.dialog || !this.#drawer) return;
+        this.#drawer.open = false;
+    };
+
+    #handleCancel = (event: Event) => {
+        if (event.target !== this.dialog || !this.#drawer) return;
+        if (!this.#drawer.open) return;
+
+        event.preventDefault();
+        this.#drawer.open = false;
+    };
 
     #render() {
         const shadow = this.attachShadow({ mode: "open" });
         const style = document.createElement("style");
         style.textContent = contentStyles;
-        this.#dialog = document.createElement("dialog");
+        this.dialog = document.createElement("dialog");
         const slot = document.createElement("slot");
         shadow.appendChild(style);
-        shadow.appendChild(this.#dialog);
-        this.#dialog.appendChild(slot);
-    }
-
-    get dialog() {
-        return this.#dialog;
+        shadow.appendChild(this.dialog);
+        this.dialog.appendChild(slot);
     }
 }
 

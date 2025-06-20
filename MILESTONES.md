@@ -69,3 +69,20 @@ Right: → translate3d(100%, 0, 0)
 -   `prefers-reduced-motion` accessibility support
 -   CSS custom properties for configurable timing/easing
 -   Coordinated overlay fade animations
+
+## 📋 Milestone 4: Backdrop Click to Close
+
+**Status**: Planned  
+**Issue**: #6
+
+### Success Criteria
+
+-   [ ] Clicking on the backdrop (overlay area) closes the drawer
+-   [ ] Clicking on drawer content does NOT close the drawer
+-   [ ] Interactive elements within drawer content work properly:
+    -   [ ] Buttons can be clicked
+    -   [ ] Form inputs (text, date, select, etc.) remain functional
+    -   [ ] Links and other clickable elements work as expected
+-   [ ] Backdrop click behavior is consistent across all directions
+-   [ ] Option to disable backdrop click to close (configurable)
+-   [ ] Demo page demonstrates backdrop interaction with various content types

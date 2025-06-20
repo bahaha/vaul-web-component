@@ -1,119 +1,122 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Developer guidance for Claude Code when working with this TypeScript web component library.
 
-## Development Commands
+## Project Overview
 
-This is a TypeScript library built with Vite and uses Bun as the package manager.
+**Vaul Web Component** - A TypeScript library providing a native web component implementation of drawer/modal interfaces with directional positioning and smooth animations.
 
-### Building
+**Tech Stack**: Web Components + Shadow DOM + @preact/signals + Native `<dialog>` + CSS animations  
+**Package Manager**: Bun  
+**Build Tool**: Vite  
+**Testing**: Vitest (unit) + Playwright (e2e)
 
--   `bun run build` - Full build: compile TypeScript, bundle with Vite, and generate type definitions
--   `bun run prebuild` - Clean dist directory (runs automatically before build)
--   `bun run postbuild` - Generate bundled type definitions (runs automatically after build)
+## Essential Commands
 
-### Testing
+### Core Development
 
--   `bun run test` - Run unit tests with Vitest
--   `bun run test:coverage` - Run unit tests with coverage report
--   `bun run test:e2e` - Run end-to-end tests with Playwright
--   `bun run test:e2e-ui` - Run Playwright tests with UI mode
--   `bun run test:e2e-headed` - Run Playwright tests in headed mode (visible browser)
--   `bun run test:all` - Run both unit and e2e tests
+-   `bun run dev` - Start development server with hot reload
+-   `bun run build` - Production build with TypeScript compilation and bundling
+-   `bun run test` - Unit tests (Vitest)
+-   `bun run test:e2e` - End-to-end tests (Playwright)
+-   `bun run check` - Full validation (lint + format + tests)
 
-### Development
+### Quality Assurance
 
--   `bun run dev` - Start Vite dev server with host binding
+-   `bun run lint` / `bun run lint:fix` - Code linting with oxlint
+-   `bun run format` / `bun run format:check` - Code formatting with Prettier
+-   `bun run test:coverage` - Unit test coverage report
+-   `bun run test:all` - Complete test suite
 
-### Linting & Formatting
+### Release & Deployment
 
--   `bun run lint` - Run oxlint on src and test directories
--   `bun run lint:fix` - Run oxlint with auto-fix enabled
--   `bun run format` - Format code with Prettier
--   `bun run format:check` - Check code formatting without modifying files
--   `bun run check` - Run lint, format check, and tests (useful for CI)
+-   `bun run release` - Build and publish to npm
+-   `gh pr merge -s -d <pr-id>` - **REQUIRED**: Squash merge PRs and delete branches
 
-### Publishing
+## Component Architecture
 
--   `bun run release` - Build and publish with np (better npm publish experience)
+### Core Components
 
-## Architecture
+-   **VaulDrawer** - Container component managing dialog state and child coordination
+-   **VaulDrawerTrigger** - Interactive trigger element with click handling
+-   **VaulDrawerContent** - Content wrapper using native `<dialog>` with Shadow DOM
 
-This is a TypeScript library for a web component drawer system with the following tech stack and structure:
+### Technical Implementation
 
-### Tech Stack
+-   **Base**: Custom HTMLElement classes with Shadow DOM encapsulation
+-   **State**: @preact/signals for reactive direction management
+-   **Dialog**: Native `<dialog>` element for accessibility and keyboard handling
+-   **Communication**: Parent-child via `closest()` pattern
+-   **Styling**: External CSS files with slot-based content projection
 
--   **Web Components**: Custom elements using HTMLElement base class with Shadow DOM
--   **State Management**: @preact/signals for reactive state management (planned)
--   **Dialog Implementation**: Native HTML `<dialog>` element for drawer content
--   **Shadow DOM**: Encapsulated styling and slot-based content projection
--   **Component Communication**: Uses `closest()` pattern for parent-child communication
+## Development Standards
 
-### Component Structure
+### React Vaul Reference Rule
 
--   **VaulDrawer**: Container component that manages dialog reference and coordinates child components
--   **VaulDrawerTrigger**: Clickable element with slot content and click event handling
--   **VaulDrawerContent**: Drawer content wrapper using native `<dialog>` element in shadow DOM
+-   **CRITICAL**: When implementing features that need to match or reference the React vaul implementation, always ask for feedback before proceeding. Do not assume implementation details without confirmation.
 
-### Coding Preferences
+### Code Style
 
--   **Private Fields**: Use `#` prefix instead of `private` keyword for class members
--   **External CSS**: Use separate CSS files with Vite raw imports (`?raw`) instead of inline styles
--   **Shadow DOM**: All components use `attachShadow({ mode: "open" })` with slot-based content projection
--   **Logging**: Use injectable logger system, only log user-facing errors/warnings, avoid verbose debug logs
--   **Event Cleanup**: Always implement `disconnectedCallback()` to remove event listeners
--   **No Comments**: Avoid adding code comments unless explicitly requested
--   **Constant Arrays**: Use `as const` for readonly constant arrays instead of explicit type annotations
--   **Early Returns**: Use early return patterns instead of nested if-else blocks
--   **Generic Naming**: Use generic function names that can handle multiple attributes/operations
--   **Explicit CSS**: Use explicit CSS properties instead of shorthand (e.g., `margin-top: 0` not `margin: 0 auto auto auto`)
--   **CSS Variables**: Define CSS custom properties in `:host` with default values
--   **Modern CSS**: Use CSS nesting and modern selectors where appropriate
+-   **Private Fields**: `#fieldName` syntax (not `private` keyword)
+-   **CSS Imports**: External files with `?raw` imports (no inline styles)
+-   **Constants**: `as const` assertions for readonly arrays
+-   **Control Flow**: Early returns over nested conditionals
+-   **Comments**: Avoid unless explicitly requested
+-   **Functions**: Generic names supporting multiple operations
 
-### Library Template Structure
+### Shadow DOM & CSS
 
-### Build System
+-   **Encapsulation**: `attachShadow({ mode: "open" })` + slot-based projection
+-   **CSS Properties**: Explicit properties (not shorthand), custom properties in `:host`
+-   **Modern CSS**: Nesting, logical properties, container queries where appropriate
 
--   **Vite**: Configured to build ESM format from single entry point
--   **TypeScript**: Strict configuration with path aliases (`@/` for src, `@@/` for root)
--   **Type Definitions**: Uses dts-bundle-generator to create single bundled .d.ts file
--   **Linting**: oxlint for fast TypeScript/JavaScript linting with web component support
+### Performance & Cleanup
 
-### Library Configuration
+-   **Event Handling**: Always implement `disconnectedCallback()` for cleanup
+-   **Logging**: Injectable system, user-facing errors only (no verbose debug)
+-   **DOM APIs**: Modern methods (`element.dataset.property` vs `getAttribute`)
 
--   Entry point: `src/index.ts`
--   Exports ESM format via package.json exports field
--   Type definitions bundled into single file: `dist/vaul-web-component.d.ts`
--   Path aliases: `@` maps to `src/`, `@@` maps to project root
+## Build Configuration
 
-### Testing
+### Core Setup
 
--   **Vitest**: Unit testing with jsdom environment for DOM testing
--   **Playwright**: End-to-end testing with cross-browser support (Chrome, Firefox, Safari, Mobile)
--   **Test Organization**: Co-locate unit tests alongside source files (e.g., `src/feature.test.ts`)
--   **Test Focus**: Unit tests focus on business logic only, e2e tests handle UI/visual behavior
--   **Test Templates**: Use `innerHTML` with template literals instead of `createElement` for cleaner test setup
--   **Test Naming**: Use feature-based naming (e.g., `drawer-direction.test.ts`, `drawer-context.test.ts`)
--   **Minimal Tests**: Keep unit tests minimal and focused, avoid verbose/redundant test cases
--   **DOM API**: Use modern DOM APIs like `element.dataset.property` instead of `getAttribute('data-property')`
--   E2E test files: `e2e/` directory with `.spec.ts` extension
--   Test server: Automatically starts Vite dev server for e2e tests
+-   **Entry**: `src/index.ts` → ESM output via package.json exports
+-   **TypeScript**: Strict config with path aliases (`@/src`, `@@/root`)
+-   **Bundling**: Vite for ESM, dts-bundle-generator for single `.d.ts` file
+-   **Linting**: oxlint (fast TS/JS) + Prettier formatting
 
-### Important Files to Update
+### Testing Strategy
 
-When adapting this template:
+-   **Unit Tests**: Co-located with source (`src/*.test.ts`), business logic focus
+-   **E2E Tests**: `e2e/*.spec.ts`, UI/visual behavior, cross-browser (Chrome/Firefox/Safari)
+-   **Test Patterns**: Template literals for DOM setup, feature-based naming
+-   **Coverage**: Minimal focused tests, avoid redundancy
 
-1. `package.json` - Update name, author, repository, description
-2. `dts-bundle-generator.config.ts` - Update `outFile` to match package name
-3. Both configs use package.json name for consistent file naming
+### Key Configuration Files
 
-## GitHub Project Labels
+```
+package.json              # Dependencies, scripts, exports
+dts-bundle-generator.config.ts    # Type definitions bundling
+vite.config.ts           # Build configuration
+playwright.config.ts     # E2E testing setup
+```
 
--   `feature`: New feature to be implemented
--   `animation`: Related to animations or transitions
--   `bug`: Indicates a problem or error
--   `documentation`: Related to documentation
--   `duplicate`: Issue or pull request already exists
--   `enhancement`: New feature or request
--   `question`: Further information is requested
--   `wontfix`: Issue will not be worked on
+## Project Management
+
+### GitHub Labels
+
+-   `feature` - New feature implementation
+-   `animation` - Animations and transitions
+-   `enhancement` - Feature improvements
+-   `bug` - Problems and errors
+-   `documentation` - Documentation updates
+-   `question` - Information requests
+-   `duplicate` - Already exists
+-   `wontfix` - Will not be addressed
+
+### Workflow
+
+-   **Issues**: Use for feature planning and bug tracking
+-   **PRs**: Always squash merge with `gh pr merge -s -d <pr-id>`
+-   **Milestones**: Track in `MILESTONES.md` with detailed success criteria
+-   **Branching**: Feature branches from `main`, delete after merge
