@@ -3,6 +3,8 @@
     --vaul-drawer-bg: white;
     --vaul-drawer-radius: 8px;
     --vaul-drawer-backdrop: rgba(0, 0, 0, 0.5);
+    --vaul-drawer-duration: 0.5s;
+    --vaul-drawer-timing: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 dialog {
@@ -11,9 +13,24 @@ dialog {
     margin: auto;
     background: var(--vaul-drawer-bg);
     border-radius: 0;
+    outline-color: transparent;
+    animation-duration: var(--vaul-drawer-duration);
+    animation-timing-function: var(--vaul-drawer-timing);
+    animation-fill-mode: both;
 
     &::backdrop {
         background: var(--vaul-drawer-backdrop);
+        animation-duration: var(--vaul-drawer-duration);
+        animation-timing-function: var(--vaul-drawer-timing);
+        animation-fill-mode: both;
+    }
+
+    &[data-state="open"]::backdrop {
+        animation-name: fade-in;
+    }
+
+    &[data-state="closed"]::backdrop {
+        animation-name: fade-out;
     }
 }
 
@@ -29,12 +46,28 @@ dialog[data-direction="top"] {
     margin-top: 0;
     border-bottom-left-radius: var(--vaul-drawer-radius);
     border-bottom-right-radius: var(--vaul-drawer-radius);
+
+    &[data-state="open"] {
+        animation-name: slide-from-top;
+    }
+
+    &[data-state="closed"] {
+        animation-name: slide-to-top;
+    }
 }
 
 dialog[data-direction="bottom"] {
     margin-bottom: 0;
     border-top-left-radius: var(--vaul-drawer-radius);
     border-top-right-radius: var(--vaul-drawer-radius);
+
+    &[data-state="open"] {
+        animation-name: slide-from-bottom;
+    }
+
+    &[data-state="closed"] {
+        animation-name: slide-to-bottom;
+    }
 }
 
 /* Vertical drawers (left/right) */
@@ -49,10 +82,102 @@ dialog[data-direction="left"] {
     margin-left: 0;
     border-top-right-radius: var(--vaul-drawer-radius);
     border-bottom-right-radius: var(--vaul-drawer-radius);
+
+    &[data-state="open"] {
+        animation-name: slide-from-left;
+    }
+
+    &[data-state="closed"] {
+        animation-name: slide-to-left;
+    }
 }
 
 dialog[data-direction="right"] {
     margin-right: 0;
     border-top-left-radius: var(--vaul-drawer-radius);
     border-bottom-left-radius: var(--vaul-drawer-radius);
+
+    &[data-state="open"] {
+        animation-name: slide-from-right;
+    }
+
+    &[data-state="closed"] {
+        animation-name: slide-to-right;
+    }
+}
+
+/* Keyframes */
+@keyframes slide-from-bottom {
+    from {
+        transform: translate3d(0, var(--initial-transform, 100%), 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes slide-to-bottom {
+    to {
+        transform: translate3d(0, var(--initial-transform, 100%), 0);
+    }
+}
+
+@keyframes slide-from-top {
+    from {
+        transform: translate3d(0, calc(var(--initial-transform, 100%) * -1), 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes slide-to-top {
+    to {
+        transform: translate3d(0, calc(var(--initial-transform, 100%) * -1), 0);
+    }
+}
+
+@keyframes slide-from-left {
+    from {
+        transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes slide-to-left {
+    to {
+        transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0);
+    }
+}
+
+@keyframes slide-from-right {
+    from {
+        transform: translate3d(var(--initial-transform, 100%), 0, 0);
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes slide-to-right {
+    to {
+        transform: translate3d(var(--initial-transform, 100%), 0, 0);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+    }
 }
