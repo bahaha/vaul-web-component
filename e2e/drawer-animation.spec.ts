@@ -19,11 +19,10 @@ test.describe("Drawer Animation Functionality", () => {
         const closingSamples = await sampleAnimationProgress(page, dialog, [50, 150]);
         expectSampleDrawerPosition(closingSamples, (posA, posB) => posA.y < posB.y);
 
-        await page.waitForTimeout(150);
+        await waitForAnimation(page, dialog);
         const finalPosition = await parseTransformMatrix(await getTransformValue(page, dialog));
         expectDrawerNearOffScreen(finalPosition, drawerHeight, "bottom");
 
-        await page.waitForTimeout(100);
         const isOpen = await page.$eval(dialog, (el: HTMLDialogElement) => el.open);
         expect(isOpen).toBe(false);
     });
@@ -162,13 +161,14 @@ test.describe("Drawer Animation Functionality", () => {
         const trigger = page.locator("vaul-drawer-trigger");
         const dialogSelector = "vaul-drawer-content dialog";
 
-        const startTime = Date.now();
         await trigger.click();
-        await waitForAnimation(page, dialogSelector);
-        const endTime = Date.now();
 
-        const duration = endTime - startTime;
-        expect(duration).toBeLessThan(300);
+        const animationDuration = await page.$eval(dialogSelector, el => {
+            return window.getComputedStyle(el).animationDuration;
+        });
+        expect(animationDuration).toBe("0.1s");
+
+        await waitForAnimation(page, dialogSelector);
     });
 
     // Helper functions

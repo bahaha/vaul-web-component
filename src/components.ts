@@ -67,8 +67,8 @@ export class VaulDrawer extends HTMLElement {
     }
 
     set open(value: boolean) {
-        if (!this.dialogRef) return;
         this.#open.value = value;
+        if (!this.dialogRef) return;
         if (value) this.dialogRef.showModal();
     }
 
