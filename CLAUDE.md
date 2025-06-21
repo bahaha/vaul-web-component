@@ -120,3 +120,7 @@ playwright.config.ts     # E2E testing setup
 -   **PRs**: Always squash merge with `gh pr merge -s -d <pr-id>`
 -   **Milestones**: Track in `MILESTONES.md` with detailed success criteria
 -   **Branching**: Feature branches from `main`, delete after merge
+
+## Memory Notes
+
+-   Record the source code file structure to avoid search for drawer implementation every time

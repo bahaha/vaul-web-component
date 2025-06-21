@@ -3,13 +3,21 @@ import triggerStyles from "./styles/vaul-drawer-trigger.css?raw";
 import contentStyles from "./styles/vaul-drawer-content.css?raw";
 import { logger } from "./logger";
 import { signal, effect } from "@preact/signals";
+import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
 
-type Direction = "top" | "bottom" | "left" | "right";
+const supportedDirections = ["top", "bottom", "left", "right"] as const;
+export type Direction = (typeof supportedDirections)[number];
 
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
     #direction = signal<Direction>("bottom");
     #open = signal<boolean>(false);
+    #dismissible = signal<boolean>(true);
+
+    private static parsers = createAttributeParsers({
+        direction: createEnumParser({ name: "direction", validValues: supportedDirections, defaultValue: "bottom" }),
+        dismissible: createBooleanParser(true),
+    });
 
     constructor() {
         super();
@@ -17,16 +25,20 @@ export class VaulDrawer extends HTMLElement {
 
     connectedCallback() {
         this.#render();
-        this.#updateDirection();
+        for (const [attr, parser] of Object.entries(VaulDrawer.parsers)) {
+            (this as any)[attr] = parser(this.getAttribute(attr));
+        }
     }
 
     static get observedAttributes() {
-        return ["direction"];
+        return VaulDrawer.parsers.getObservedAttributes();
     }
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === "direction" && oldValue !== newValue) {
-            this.#updateDirection();
+        if (oldValue === newValue) return;
+        const parser = VaulDrawer.parsers[name as keyof typeof VaulDrawer.parsers];
+        if (parser && typeof parser === "function") {
+            (this as any)[name] = parser(newValue);
         }
     }
 
@@ -39,27 +51,20 @@ export class VaulDrawer extends HTMLElement {
         shadow.appendChild(slot);
     }
 
-    #updateDirection() {
-        const directionAttr = this.getAttribute("direction");
-        const validDirections = ["top", "bottom", "left", "right"] as const;
-
-        if (!directionAttr || !validDirections.includes(directionAttr as Direction)) {
-            if (directionAttr) {
-                logger.warn(`VaulDrawer: invalid direction "${directionAttr}", defaulting to "bottom"`);
-            }
-            this.direction = "bottom";
-            return;
-        }
-
-        this.direction = directionAttr as Direction;
-    }
-
     get direction() {
         return this.#direction.value;
     }
 
     set direction(direction: Direction) {
         this.#direction.value = direction;
+    }
+
+    get dismissible() {
+        return this.#dismissible.value;
+    }
+
+    set dismissible(value: boolean) {
+        this.#dismissible.value = value;
     }
 
     get open() {
@@ -135,12 +140,6 @@ export class VaulDrawerContent extends HTMLElement {
         this.#setupAnimationListeners();
     }
 
-    disconnectedCallback() {
-        this.dialog?.removeEventListener("animationend", this.#handleAnimationEnd);
-        this.dialog?.removeEventListener("animationcancel", this.#handleAnimationCancel);
-        this.dialog?.removeEventListener("cancel", this.#handleCancel);
-    }
-
     #setupDrawerRef() {
         this.#drawer = this.closest("vaul-drawer") as VaulDrawer;
         if (!this.#drawer) {
@@ -157,12 +156,24 @@ export class VaulDrawerContent extends HTMLElement {
     }
 
     #setupAnimationListeners() {
-        this.dialog.addEventListener("animationend", this.#handleAnimationEnd);
-        this.dialog.addEventListener("animationcancel", this.#handleAnimationCancel);
-        this.dialog.addEventListener("cancel", this.#handleCancel);
+        this.dialog.addEventListener("animationend", this.#closeDialog);
+        // Use capture to intercept cancel events before dialog's internal handlers
+        this.dialog.addEventListener("cancel", this.#blockNativeDialogCancel, true);
+        this.dialog.addEventListener("click", this.#handleDialogClick);
+        // Chrome will ignore a event.preventDefault() on the second Esc press, see
+        // - issues.chromium.org/issues/346597066
+        // - issues.chromium.org/issues/41491338
+        window.addEventListener("keydown", this.#handleKeyDown, true);
     }
 
-    #handleAnimationEnd = (event: AnimationEvent) => {
+    disconnectedCallback() {
+        this.dialog?.removeEventListener("animationend", this.#closeDialog);
+        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
+        this.dialog?.removeEventListener("click", this.#handleDialogClick);
+        window.removeEventListener("keydown", this.#handleKeyDown, true);
+    }
+
+    #closeDialog = (event: AnimationEvent) => {
         if (event.target !== this.dialog || !this.#drawer) return;
 
         if (event.animationName.startsWith("slide-to-")) {
@@ -170,16 +181,29 @@ export class VaulDrawerContent extends HTMLElement {
         }
     };
 
-    #handleAnimationCancel = (event: AnimationEvent) => {
-        if (event.target !== this.dialog || !this.#drawer) return;
+    #handleKeyDown = (event: KeyboardEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+        if (event.key !== "Escape") return;
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!this.#drawer.dismissible) return;
         this.#drawer.open = false;
     };
 
-    #handleCancel = (event: Event) => {
-        if (event.target !== this.dialog || !this.#drawer) return;
-        if (!this.#drawer.open) return;
-
+    #blockNativeDialogCancel = (event: Event) => {
+        // Always prevent the native dialog cancel behavior
+        // We handle ESC through the global keydown listener instead
         event.preventDefault();
+        event.stopImmediatePropagation();
+    };
+
+    #handleDialogClick = (event: MouseEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+        if (event.target !== this.dialog) return;
+        if (!this.#drawer.dismissible) return;
+
         this.#drawer.open = false;
     };
 

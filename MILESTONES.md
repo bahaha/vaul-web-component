@@ -23,10 +23,11 @@
 -   [x] Enhanced demo page with direction controls
 -   [x] Comprehensive test coverage
 
-## 🚧 Milestone 3: Slide-in Animations
+## ✅ Milestone 3: Slide-in Animations
 
-**Status**: Planned  
-**Issue**: #4
+**Status**: Completed  
+**Issue**: #4  
+**PR**: #5
 
 ### Success Criteria
 
@@ -70,19 +71,26 @@ Right: → translate3d(100%, 0, 0)
 -   CSS custom properties for configurable timing/easing
 -   Coordinated overlay fade animations
 
-## 📋 Milestone 4: Backdrop Click to Close
+## ✅ Milestone 4: Backdrop Click to Close
 
-**Status**: Planned  
+**Status**: Completed  
 **Issue**: #6
 
 ### Success Criteria
 
--   [ ] Clicking on the backdrop (overlay area) closes the drawer
--   [ ] Clicking on drawer content does NOT close the drawer
--   [ ] Interactive elements within drawer content work properly:
-    -   [ ] Buttons can be clicked
-    -   [ ] Form inputs (text, date, select, etc.) remain functional
-    -   [ ] Links and other clickable elements work as expected
--   [ ] Backdrop click behavior is consistent across all directions
--   [ ] Option to disable backdrop click to close (configurable)
--   [ ] Demo page demonstrates backdrop interaction with various content types
+-   [x] Clicking on the backdrop (overlay area) closes the drawer
+-   [x] Clicking on drawer content does NOT close the drawer
+-   [x] Interactive elements within drawer content work properly:
+    -   [x] Buttons can be clicked
+    -   [x] Form inputs (text, date, select, etc.) remain functional
+    -   [x] Links and other clickable elements work as expected
+-   [x] Backdrop click behavior is consistent across all directions
+-   [x] Option to disable backdrop click to close (configurable via `dismissible` attribute)
+-   [x] Demo page demonstrates backdrop interaction with various content types
+
+### Implementation Details
+
+-   **Core Logic**: `#handleDialogClick` method checks `event.target === this.dialog` to detect backdrop clicks
+-   **Configuration**: `dismissible` attribute (default: `true`) controls backdrop click behavior
+-   **Signal Integration**: Uses @preact/signals for reactive dismissible state management
+-   **Event Delegation**: Proper event handling ensures content interactions work normally

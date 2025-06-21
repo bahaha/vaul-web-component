@@ -13,7 +13,7 @@ dialog {
     margin: auto;
     background: var(--vaul-drawer-bg);
     border-radius: 0;
-    outline-color: transparent;
+    outline: none;
     animation-duration: var(--vaul-drawer-duration);
     animation-timing-function: var(--vaul-drawer-timing);
     animation-fill-mode: both;
