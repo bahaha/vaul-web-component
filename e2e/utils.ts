@@ -94,7 +94,7 @@ function isFlexibleDrawer(options: CreateDrawerOptions): options is FlexibleDraw
 
 function getVaulDrawerTemplate({ direction = "bottom", dismissible = true, animationDuration = 100 }: SimpleDrawer) {
     return `
-        <vaul-drawer direction=${direction} dismissible=${dismissible}>
+        <vaul-drawer direction="${direction}" dismissible="${dismissible}">
             <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
             <vaul-drawer-content style="--vaul-drawer-duration: ${animationDuration}ms;">
                 <div>Hello Web Component Drawer!</div>
