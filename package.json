@@ -23,6 +23,7 @@
         "build": "tsc && vite build",
         "postbuild": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
         "test": "vitest",
+        "test:watch": "vitest -w",
         "test:coverage": "vitest --coverage",
         "test:e2e": "bun run build && playwright test",
         "test:e2e-ui": "bun run build && playwright test --ui",

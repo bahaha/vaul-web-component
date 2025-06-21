@@ -138,11 +138,11 @@ describe("animation-state", () => {
 
         drawer.open = true;
 
-        const cancelEvent = new Event("cancel", { cancelable: true });
-        dialog.dispatchEvent(cancelEvent);
+        const keydownEvent = new KeyboardEvent("keydown", { key: "Escape", cancelable: true });
+        window.dispatchEvent(keydownEvent);
 
         expect(dialog.dataset.state).toBe("closed");
-        expect(cancelEvent.defaultPrevented).toBe(true);
+        expect(keydownEvent.defaultPrevented).toBe(true);
     });
 
     it("should handle rapid toggle without state inconsistency", async () => {

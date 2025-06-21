@@ -35,30 +35,49 @@
             </header>
 
             <div class="bg-white rounded-lg shadow-md p-8">
-                <!-- Direction Controls -->
-                <div class="mb-8">
-                    <div class="flex flex-wrap gap-4">
-                        <label class="flex items-center">
-                            <input type="radio" name="direction" value="top" class="mr-2" />
-                            <span>Top</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="direction" value="bottom" class="mr-2" checked />
-                            <span>Bottom</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="direction" value="left" class="mr-2" />
-                            <span>Left</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="direction" value="right" class="mr-2" />
-                            <span>Right</span>
-                        </label>
+                <!-- Controls -->
+                <div class="mb-8 space-y-4">
+                    <!-- Direction Controls -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Direction</h3>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="top" class="mr-2" />
+                                <span>Top</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="bottom" class="mr-2" checked />
+                                <span>Bottom</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="left" class="mr-2" />
+                                <span>Left</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="direction" value="right" class="mr-2" />
+                                <span>Right</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Backdrop Click Controls -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Backdrop Click Behavior</h3>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="dismissible" value="true" class="mr-2" checked />
+                                <span>Dismissible (click backdrop to close)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="dismissible" value="false" class="mr-2" />
+                                <span>Non-dismissible (backdrop click disabled)</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Test Drawers -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Default Styling -->
                     <div>
                         <vaul-drawer id="default-drawer" direction="bottom">
@@ -209,6 +228,101 @@
                             </vaul-drawer-content>
                         </vaul-drawer>
                     </div>
+
+                    <!-- Interactive Content Test -->
+                    <div>
+                        <vaul-drawer id="interactive-drawer" direction="bottom">
+                            <vaul-drawer-trigger
+                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                            >
+                                🎯 Test Interactive Content
+                            </vaul-drawer-trigger>
+                            <vaul-drawer-content>
+                                <div class="p-6 max-w-md mx-auto">
+                                    <h4 class="text-xl font-bold mb-4 text-center">Interactive Content Test</h4>
+                                    <p class="text-sm text-gray-600 mb-4 text-center">
+                                        Click outside to test backdrop dismiss behavior
+                                    </p>
+
+                                    <!-- Form Elements -->
+                                    <form class="space-y-4" onsubmit="return false;">
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Name:</label>
+                                            <input
+                                                type="text"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter your name"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Email:</label>
+                                            <input
+                                                type="email"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="Enter your email"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Favorite Color:</label>
+                                            <select
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option>Red</option>
+                                                <option>Blue</option>
+                                                <option>Green</option>
+                                                <option>Yellow</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium mb-1">Date:</label>
+                                            <input
+                                                type="date"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" class="mr-2" />
+                                                <span class="text-sm">I agree to the terms and conditions</span>
+                                            </label>
+                                        </div>
+
+                                        <!-- Interactive Buttons -->
+                                        <div class="flex gap-2">
+                                            <button
+                                                type="submit"
+                                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                                            >
+                                                Submit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                                                onclick="alert('Button clicked!')"
+                                            >
+                                                Test Alert
+                                            </button>
+                                        </div>
+
+                                        <!-- Links -->
+                                        <div class="pt-2">
+                                            <a
+                                                href="#"
+                                                class="text-blue-600 hover:text-blue-800 underline"
+                                                onclick="alert('Link clicked!'); return false;"
+                                            >
+                                                Test Link
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer>
+                    </div>
                 </div>
             </div>
         </div>
@@ -219,15 +333,18 @@
             console.log("Vaul Web Component Demo - Milestone 1 & 2");
             console.log("Testing basic drawer structure and directional positioning");
 
-            // Direction control functionality
+            // Demo control functionality
             document.addEventListener("DOMContentLoaded", function () {
-                const radioButtons = document.querySelectorAll('input[name="direction"]');
+                const directionRadios = document.querySelectorAll('input[name="direction"]');
+                const dismissibleRadios = document.querySelectorAll('input[name="dismissible"]');
                 const defaultDrawer = document.getElementById("default-drawer");
                 const customDrawer = document.getElementById("custom-drawer");
+                const interactiveDrawer = document.getElementById("interactive-drawer");
                 const defaultDirectionDisplay = document.getElementById("default-direction-display");
                 const customDirectionDisplay = document.getElementById("custom-direction-display");
 
-                radioButtons.forEach(radio => {
+                // Direction control
+                directionRadios.forEach(radio => {
                     radio.addEventListener("change", function () {
                         if (this.checked) {
                             const direction = this.value;
@@ -235,12 +352,29 @@
                             // Update drawer directions
                             defaultDrawer.setAttribute("direction", direction);
                             customDrawer.setAttribute("direction", direction);
+                            interactiveDrawer.setAttribute("direction", direction);
 
                             // Update direction displays
                             defaultDirectionDisplay.textContent = direction;
                             customDirectionDisplay.textContent = direction;
 
                             console.log(`Direction changed to: ${direction}`);
+                        }
+                    });
+                });
+
+                // Dismissible control
+                dismissibleRadios.forEach(radio => {
+                    radio.addEventListener("change", function () {
+                        if (this.checked) {
+                            const dismissible = this.value;
+
+                            // Update drawer dismissible property
+                            defaultDrawer.setAttribute("dismissible", dismissible);
+                            customDrawer.setAttribute("dismissible", dismissible);
+                            interactiveDrawer.setAttribute("dismissible", dismissible);
+
+                            console.log(`Dismissible changed to: ${dismissible}`);
                         }
                     });
                 });
