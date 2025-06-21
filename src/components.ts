@@ -1,9 +1,11 @@
 import drawerStyles from "./styles/vaul-drawer.css?raw";
 import triggerStyles from "./styles/vaul-drawer-trigger.css?raw";
 import contentStyles from "./styles/vaul-drawer-content.css?raw";
+import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
-import { signal, effect } from "@preact/signals";
+import { signal, effect, computed } from "@preact/signals";
 import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
+import { camelCase } from "lodash-es";
 
 const supportedDirections = ["top", "bottom", "left", "right"] as const;
 export type Direction = (typeof supportedDirections)[number];
@@ -13,6 +15,11 @@ export class VaulDrawer extends HTMLElement {
     #direction = signal<Direction>("bottom");
     #open = signal<boolean>(false);
     #dismissible = signal<boolean>(true);
+
+    #isVertical = computed(() => {
+        const direction = this.#direction.value;
+        return direction === "top" || direction === "bottom";
+    });
 
     private static parsers = createAttributeParsers({
         direction: createEnumParser({ name: "direction", validValues: supportedDirections, defaultValue: "bottom" }),
@@ -65,6 +72,10 @@ export class VaulDrawer extends HTMLElement {
 
     set dismissible(value: boolean) {
         this.#dismissible.value = value;
+    }
+
+    get isVertical() {
+        return this.#isVertical.value;
     }
 
     get open() {
@@ -128,6 +139,22 @@ export class VaulDrawerTrigger extends HTMLElement {
 export class VaulDrawerContent extends HTMLElement {
     #drawer?: VaulDrawer;
     dialog!: HTMLDialogElement;
+    #showHandle = signal<boolean>(true);
+    #builtInHandle?: HTMLElement;
+
+    #showDrawerHandle = computed(() => {
+        if (!this.#drawer) return false;
+
+        const isVertical = this.#drawer.isVertical;
+        const showHandle = this.#showHandle.value;
+        const hasManualHandle = this.querySelector("vaul-drawer-handle");
+
+        return isVertical && showHandle && !hasManualHandle;
+    });
+
+    private static parsers = createAttributeParsers({
+        "show-handle": createBooleanParser(true),
+    });
 
     constructor() {
         super();
@@ -138,6 +165,46 @@ export class VaulDrawerContent extends HTMLElement {
         this.#setupDrawerRef();
         this.#bindDrawerAttributes();
         this.#setupAnimationListeners();
+
+        for (const [attr, parser] of Object.entries(VaulDrawerContent.parsers)) {
+            (this as any)[camelCase(attr)] = parser(this.getAttribute(attr));
+        }
+
+        if (!this.#drawer) return;
+        effect(() => {
+            const shouldShow = this.#showDrawerHandle.value;
+            const direction = this.#drawer!.direction;
+
+            logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
+
+            if (shouldShow) {
+                // Remove existing handle first to reposition it for direction changes
+                this.#removeBuiltInHandle();
+                this.#addBuiltInHandle();
+            } else {
+                this.#removeBuiltInHandle();
+            }
+        });
+    }
+
+    static get observedAttributes() {
+        return VaulDrawerContent.parsers.getObservedAttributes();
+    }
+
+    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        if (oldValue === newValue) return;
+        const parser = VaulDrawerContent.parsers[name as keyof typeof VaulDrawerContent.parsers];
+        if (parser && typeof parser === "function") {
+            (this as any)[camelCase(name)] = parser(newValue);
+        }
+    }
+
+    get showHandle() {
+        return this.#showHandle.value;
+    }
+
+    set showHandle(value: boolean) {
+        this.#showHandle.value = value;
     }
 
     #setupDrawerRef() {
@@ -217,8 +284,56 @@ export class VaulDrawerContent extends HTMLElement {
         shadow.appendChild(this.dialog);
         this.dialog.appendChild(slot);
     }
+
+    #addBuiltInHandle() {
+        if (this.#builtInHandle) return;
+        const handle = document.createElement("vaul-drawer-handle");
+        const direction = this.#drawer!.direction;
+        handle.setAttribute("data-drawer-direction", direction);
+
+        if (direction === "bottom") {
+            this.dialog.insertBefore(handle, this.dialog.firstChild);
+        } else if (direction === "top") {
+            this.dialog.appendChild(handle);
+        }
+
+        this.#builtInHandle = handle;
+        logger.debug(`VaulDrawerContent: Built-in handle added for vertical drawer`);
+    }
+
+    #removeBuiltInHandle() {
+        if (!this.#builtInHandle?.parentNode) return;
+
+        this.#builtInHandle.parentNode.removeChild(this.#builtInHandle);
+        this.#builtInHandle = undefined;
+        logger.debug("VaulDrawerContent: Built-in handle removed");
+    }
+}
+
+export class VaulDrawerHandle extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.#render();
+    }
+
+    #render() {
+        const shadow = this.attachShadow({ mode: "open" });
+        const style = document.createElement("style");
+        style.textContent = handleStyles;
+
+        const hitArea = document.createElement("span");
+        hitArea.className = "handle-hitarea";
+        hitArea.setAttribute("aria-hidden", "true");
+
+        shadow.appendChild(style);
+        shadow.appendChild(hitArea);
+    }
 }
 
 customElements.define("vaul-drawer", VaulDrawer);
 customElements.define("vaul-drawer-trigger", VaulDrawerTrigger);
 customElements.define("vaul-drawer-content", VaulDrawerContent);
+customElements.define("vaul-drawer-handle", VaulDrawerHandle);

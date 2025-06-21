@@ -1,0 +1,61 @@
+:host {
+    --vaul-handle-width: 32px;
+    --vaul-handle-height: 4px;
+    --vaul-handle-radius: 2px;
+    --vaul-handle-color: #9ca3af;
+
+    display: block;
+    position: relative;
+    z-index: 20;
+    margin: 8px 0;
+    width: var(--vaul-handle-width);
+    height: var(--vaul-handle-height);
+    background: color-mix(in srgb, var(--vaul-handle-color) 70%, transparent);
+    border-radius: var(--vaul-handle-radius);
+    margin-left: auto;
+    margin-right: auto;
+    touch-action: pan-y;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:active {
+        background: var(--vaul-handle-color);
+        transform: translateY(-0.5px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.handle-hitarea {
+    /* Invisible overlay for touch targets */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100%, 2.75rem);
+    height: max(100%, 2.75rem);
+    touch-action: inherit;
+    cursor: pointer;
+}
+
+.handle-hitarea:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+.handle-hitarea:focus-visible {
+    outline: 2px solid currentColor;
+}
+
+@media (pointer: fine) {
+    .handle-hitarea {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host {
+        transition: none;
+    }
+}

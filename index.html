@@ -74,28 +74,47 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Handle Controls -->
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Handle Behavior</h3>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="flex items-center">
+                                <input type="radio" name="handle" value="auto" class="mr-2" checked />
+                                <span>Auto (built-in handle for vertical drawers)</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="handle" value="disabled" class="mr-2" />
+                                <span>Disabled (no built-in handle)</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Test Drawers -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Default Styling -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Simple Drawer -->
                     <div>
                         <vaul-drawer id="default-drawer" direction="bottom">
                             <vaul-drawer-trigger class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
                                 Open Drawer
                             </vaul-drawer-trigger>
                             <vaul-drawer-content>
-                                <div class="p-6">
-                                    <h4 class="text-lg font-bold mb-3">Drawer Content</h4>
-                                    <p class="text-gray-600">
+                                <div class="p-6 pt-2">
+                                    <h4 class="text-lg font-bold mb-3">Simple Drawer</h4>
+                                    <p class="text-gray-600 mb-4">
                                         Direction: <span id="default-direction-display">bottom</span>
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        This is a basic drawer with minimal styling. Use the controls above to test
+                                        different configurations.
                                     </p>
                                 </div>
                             </vaul-drawer-content>
                         </vaul-drawer>
                     </div>
 
-                    <!-- Custom Styling -->
+                    <!-- Custom Styled Drawer -->
                     <div>
                         <vaul-drawer id="custom-drawer" direction="bottom">
                             <vaul-drawer-trigger
@@ -182,9 +201,9 @@
                                         >
                                             <div class="flex items-center mb-2">
                                                 <span class="text-xl mr-2">📱</span>
-                                                <h4 class="font-semibold text-pink-200">Responsive</h4>
+                                                <h4 class="font-semibold text-pink-200">Handle Features</h4>
                                             </div>
-                                            <p class="text-sm text-indigo-100">Works on all screen sizes</p>
+                                            <p class="text-sm text-indigo-100">Smart handle with safe area support</p>
                                         </div>
 
                                         <div
@@ -198,27 +217,8 @@
                                         </div>
                                     </div>
 
-                                    <!-- Action Buttons -->
-                                    <div class="flex flex-wrap gap-3">
-                                        <button
-                                            class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-lg"
-                                        >
-                                            🔗 Learn More
-                                        </button>
-                                        <button
-                                            class="px-4 py-2 bg-gradient-to-r from-pink-500 to-violet-500 hover:from-pink-600 hover:to-violet-600 rounded-lg text-white font-medium transition-all duration-200 hover:shadow-lg"
-                                        >
-                                            ⭐ Star on GitHub
-                                        </button>
-                                        <button
-                                            class="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg text-white font-medium transition-all duration-200"
-                                        >
-                                            📖 Documentation
-                                        </button>
-                                    </div>
-
                                     <!-- Footer -->
-                                    <div class="mt-6 pt-4 border-t border-white/20">
+                                    <div class="pt-4 border-t border-white/20">
                                         <p class="text-sm text-indigo-200 flex items-center">
                                             <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
                                             Powered by Web Components & TypeScript
@@ -228,97 +228,49 @@
                             </vaul-drawer-content>
                         </vaul-drawer>
                     </div>
+                </div>
 
-                    <!-- Interactive Content Test -->
-                    <div>
-                        <vaul-drawer id="interactive-drawer" direction="bottom">
+                <!-- Custom Handle Demo -->
+                <div class="mt-12 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-4 text-center">Custom Handle Example</h3>
+                    <div class="flex justify-center">
+                        <vaul-drawer direction="bottom">
                             <vaul-drawer-trigger
-                                class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                                class="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                             >
-                                🎯 Test Interactive Content
+                                🎨 Custom Handle Demo
                             </vaul-drawer-trigger>
-                            <vaul-drawer-content>
-                                <div class="p-6 max-w-md mx-auto">
-                                    <h4 class="text-xl font-bold mb-4 text-center">Interactive Content Test</h4>
-                                    <p class="text-sm text-gray-600 mb-4 text-center">
-                                        Click outside to test backdrop dismiss behavior
+                            <vaul-drawer-content show-handle="false">
+                                <!-- Custom handle with Tailwind styling -->
+                                <vaul-drawer-handle
+                                    class="my-6 mx-auto w-20 h-2 bg-rose-500 rounded-lg shadow-lg hover:bg-rose-600 hover:shadow-xl transition-all duration-200"
+                                >
+                                </vaul-drawer-handle>
+                                <div class="px-6 pb-6">
+                                    <h4 class="text-xl font-bold mb-4 text-center">Custom Styled Handle</h4>
+                                    <p class="text-gray-600 mb-4 text-center">
+                                        This drawer uses a custom handle element styled with Tailwind classes - larger
+                                        rose handle with shadows.
                                     </p>
-
-                                    <!-- Form Elements -->
-                                    <form class="space-y-4" onsubmit="return false;">
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Name:</label>
-                                            <input
-                                                type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Enter your name"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Email:</label>
-                                            <input
-                                                type="email"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Enter your email"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Favorite Color:</label>
-                                            <select
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            >
-                                                <option>Red</option>
-                                                <option>Blue</option>
-                                                <option>Green</option>
-                                                <option>Yellow</option>
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm font-medium mb-1">Date:</label>
-                                            <input
-                                                type="date"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label class="flex items-center">
-                                                <input type="checkbox" class="mr-2" />
-                                                <span class="text-sm">I agree to the terms and conditions</span>
-                                            </label>
-                                        </div>
-
-                                        <!-- Interactive Buttons -->
-                                        <div class="flex gap-2">
-                                            <button
-                                                type="submit"
-                                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-                                            >
-                                                Submit
-                                            </button>
-                                            <button
-                                                type="button"
-                                                class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
-                                                onclick="alert('Button clicked!')"
-                                            >
-                                                Test Alert
-                                            </button>
-                                        </div>
-
-                                        <!-- Links -->
-                                        <div class="pt-2">
-                                            <a
-                                                href="#"
-                                                class="text-blue-600 hover:text-blue-800 underline"
-                                                onclick="alert('Link clicked!'); return false;"
-                                            >
-                                                Test Link
-                                            </a>
-                                        </div>
-                                    </form>
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <h5 class="font-semibold mb-2">Customization Features:</h5>
+                                        <ul class="text-sm text-gray-600 space-y-1">
+                                            <li>
+                                                • <strong>Built-in handles:</strong> Automatic with polished default
+                                                styling
+                                            </li>
+                                            <li>
+                                                • <strong>Custom handles:</strong> Use vaul-drawer-handle with Tailwind
+                                                classes
+                                            </li>
+                                            <li>
+                                                • <strong>Direction-aware:</strong> Positioning adapts to drawer
+                                                direction
+                                            </li>
+                                            <li>• <strong>Accessible:</strong> 44px touch targets on mobile devices</li>
+                                            <li>• <strong>Safe areas:</strong> Respects iOS and Android safe areas</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </vaul-drawer-content>
                         </vaul-drawer>
@@ -337,11 +289,14 @@
             document.addEventListener("DOMContentLoaded", function () {
                 const directionRadios = document.querySelectorAll('input[name="direction"]');
                 const dismissibleRadios = document.querySelectorAll('input[name="dismissible"]');
+                const handleRadios = document.querySelectorAll('input[name="handle"]');
                 const defaultDrawer = document.getElementById("default-drawer");
                 const customDrawer = document.getElementById("custom-drawer");
-                const interactiveDrawer = document.getElementById("interactive-drawer");
                 const defaultDirectionDisplay = document.getElementById("default-direction-display");
                 const customDirectionDisplay = document.getElementById("custom-direction-display");
+
+                // All drawers for bulk operations
+                const allDrawers = [defaultDrawer, customDrawer];
 
                 // Direction control
                 directionRadios.forEach(radio => {
@@ -349,10 +304,10 @@
                         if (this.checked) {
                             const direction = this.value;
 
-                            // Update drawer directions
-                            defaultDrawer.setAttribute("direction", direction);
-                            customDrawer.setAttribute("direction", direction);
-                            interactiveDrawer.setAttribute("direction", direction);
+                            // Update all drawer directions
+                            allDrawers.forEach(drawer => {
+                                if (drawer) drawer.setAttribute("direction", direction);
+                            });
 
                             // Update direction displays
                             defaultDirectionDisplay.textContent = direction;
@@ -369,12 +324,46 @@
                         if (this.checked) {
                             const dismissible = this.value;
 
-                            // Update drawer dismissible property
-                            defaultDrawer.setAttribute("dismissible", dismissible);
-                            customDrawer.setAttribute("dismissible", dismissible);
-                            interactiveDrawer.setAttribute("dismissible", dismissible);
+                            // Update all drawer dismissible property
+                            allDrawers.forEach(drawer => {
+                                if (drawer) drawer.setAttribute("dismissible", dismissible);
+                            });
 
                             console.log(`Dismissible changed to: ${dismissible}`);
+                        }
+                    });
+                });
+
+                // Handle control
+                handleRadios.forEach(radio => {
+                    radio.addEventListener("change", function () {
+                        if (this.checked) {
+                            const handleMode = this.value;
+
+                            switch (handleMode) {
+                                case "auto":
+                                    // Enable built-in handles for vertical drawers
+                                    allDrawers.forEach(drawer => {
+                                        if (drawer) {
+                                            const content = drawer.querySelector("vaul-drawer-content");
+                                            if (content) content.removeAttribute("show-handle");
+                                        }
+                                    });
+                                    console.log("Handle mode: Auto - Built-in handles enabled for vertical drawers");
+                                    break;
+                                case "disabled":
+                                    // Disable all handles
+                                    allDrawers.forEach(drawer => {
+                                        if (drawer) {
+                                            const content = drawer.querySelector("vaul-drawer-content");
+                                            if (content) content.setAttribute("show-handle", "false");
+                                        }
+                                    });
+                                    console.log("Handle mode: Disabled - All built-in handles disabled");
+                                    break;
+                            }
+
+                            console.log(`Handle mode changed to: ${handleMode}`);
                         }
                     });
                 });
