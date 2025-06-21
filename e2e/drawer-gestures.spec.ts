@@ -33,7 +33,7 @@ test.describe("dismissible = true (default behavior)", () => {
         await openDrawer();
 
         await elements.contentLabel.click();
-        const checked = await elements.contentCkeckbox.isChecked();
+        const checked = await elements.contentCheckbox.isChecked();
         expect(checked).toBe(true);
 
         const { open } = await getDialogDescriber();

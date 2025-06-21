@@ -78,7 +78,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
     return {
         elements: {
             trigger,
-            contentCkeckbox: page.getByTestId("drawer__content_checkbox"),
+            contentCheckbox: page.getByTestId("drawer__content_checkbox"),
             contentLabel: page.getByTestId("drawer__content_label"),
         },
         getDialogDescriber,
@@ -97,7 +97,7 @@ function getVaulDrawerTemplate({ direction = "bottom", dismissible = true, anima
         <vaul-drawer direction=${direction} dismissible=${dismissible}>
             <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
             <vaul-drawer-content style="--vaul-drawer-duration: ${animationDuration}ms;">
-                <p>Hello Web Component Drawer!</div>
+                <div>Hello Web Component Drawer!</div>
                 <label>
                     <input name="checkbox" type="checkbox" data-testid="drawer__content_checkbox">
                     <span data-testid="drawer__content_label">checkbox will be checked if label clicks</span>
