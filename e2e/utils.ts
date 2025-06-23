@@ -17,10 +17,18 @@ type CreateDrawerOptions = SimpleDrawer | FlexibleDrawer;
 export async function createDrawer(options: CreateDrawerOptions) {
     const { page } = options;
     const template = isFlexibleDrawer(options) ? options.template : getVaulDrawerTemplate(options);
+
+    // Set content first - establish DOM structure
     await page.setContent(template);
+
+    // Then load script - components register after DOM is ready
+    await page.addScriptTag({ path: "./dist/vaul-web-component.esm.js", type: "module" });
+
     await page.waitForTimeout(100);
 
     const trigger = page.locator("vaul-drawer-trigger");
+    const content = page.locator("vaul-drawer-content");
+    const handle = content.locator("vaul-drawer-handle");
     const dialogSelector = "vaul-drawer-content dialog";
     const direction = (await page.locator("vaul-drawer").getAttribute("direction")) ?? "bottom";
     const dialog = page.locator(dialogSelector);
@@ -78,6 +86,8 @@ export async function createDrawer(options: CreateDrawerOptions) {
     return {
         elements: {
             trigger,
+            content,
+            handle,
             contentCheckbox: page.getByTestId("drawer__content_checkbox"),
             contentLabel: page.getByTestId("drawer__content_label"),
         },

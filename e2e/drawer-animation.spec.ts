@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createDrawer } from "./utils";
 
-test.beforeEach(async ({ page }) => {
-    await page.addScriptTag({ path: "./dist/vaul-web-component.esm.js", type: "module" });
-});
-
 test("should animate slide-from-bottom with correct transform values", async ({ page }) => {
     const { getDialogDescriber, openDrawer, waitDialogAnimation } = await createDrawer({ page, direction: "bottom" });
 

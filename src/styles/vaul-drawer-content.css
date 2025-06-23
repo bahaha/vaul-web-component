@@ -17,6 +17,8 @@ dialog {
     animation-duration: var(--vaul-drawer-duration);
     animation-timing-function: var(--vaul-drawer-timing);
     animation-fill-mode: both;
+    /* Drawer handle will be cutting off with overflow: auto; */
+    overflow: visible;
 
     &::backdrop {
         background: var(--vaul-drawer-backdrop);
