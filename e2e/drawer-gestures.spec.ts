@@ -1,10 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createDrawer } from "./utils";
 
-test.beforeEach(async ({ page }) => {
-    await page.addScriptTag({ path: "./dist/vaul-web-component.esm.js", type: "module" });
-});
-
 test.describe("dismissible = true (default behavior)", () => {
     test("should close drawer when clicking on backdrop", async ({ page }) => {
         const { getDialogDescriber, openDrawer, clickOnBackdrop, waitDialogAnimation } = await createDrawer({ page });

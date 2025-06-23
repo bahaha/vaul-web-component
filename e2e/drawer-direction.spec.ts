@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { createDrawer } from "./utils";
 
-test.beforeEach(async ({ page }) => {
-    await page.addScriptTag({ path: "./dist/vaul-web-component.esm.js", type: "module" });
-});
-
 test("should position drawer from top edge", async ({ page }) => {
     const { getDialogDescriber, openDrawer } = await createDrawer({ page, direction: "top" });
     await openDrawer();

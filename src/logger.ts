@@ -1,8 +1,8 @@
 interface Logger {
-    error(message: string): void;
-    warn(message: string): void;
-    log(message: string): void;
-    debug(message: string): void;
+    error(message: string, ...args: any[]): void;
+    warn(message: string, ...args: any[]): void;
+    log(message: string, ...args: any[]): void;
+    debug(message: string, ...args: any[]): void;
 }
 
 const noopLogger: Logger = {
