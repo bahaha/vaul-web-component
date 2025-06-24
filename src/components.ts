@@ -5,6 +5,7 @@ import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
 import { signal, effect, computed } from "@preact/signals";
 import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
+import { ScrollManager } from "./utils/scroll-manager";
 const camelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
 const supportedDirections = ["top", "bottom", "left", "right"] as const;
@@ -148,11 +149,7 @@ export class VaulDrawerContent extends HTMLElement {
     #showHandle = signal<boolean>(true);
     #builtInHandle?: HTMLElement;
     #effectCleanups: (() => void)[] = [];
-
-    // Background interaction prevention
-    #scrollPosition = 0;
-    #scrollbarWidth = 0;
-    #inertElements: Element[] = [];
+    #scrollManager!: ScrollManager;
 
     #showDrawerHandle = computed(() => {
         if (!this.#drawer) return false;
@@ -185,11 +182,9 @@ export class VaulDrawerContent extends HTMLElement {
 
         if (!this.#drawer) return;
         this.#registerDrawerHandle();
+        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
         this.#effectCleanups.push(
-            effect(() => {
-                if (!this.#drawer) return;
-                if (this.#drawer.open) this.#lockBackgroundInteraction();
-            })
+            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
         );
     }
 
@@ -211,7 +206,7 @@ export class VaulDrawerContent extends HTMLElement {
         this.dialog?.removeEventListener("click", this.#handleDialogClick);
         window.removeEventListener("keydown", this.#handleKeyDown, true);
 
-        this.#unlockBackgroundInteraction();
+        this.#scrollManager.destroy();
 
         this.#effectCleanups.forEach(cleanup => cleanup());
         this.#effectCleanups = [];
@@ -263,7 +258,6 @@ export class VaulDrawerContent extends HTMLElement {
 
         if (event.animationName.startsWith("slide-to-")) {
             this.dialog.close();
-            this.#unlockBackgroundInteraction();
         }
     };
 
@@ -293,73 +287,12 @@ export class VaulDrawerContent extends HTMLElement {
         this.#drawer.open = false;
     };
 
-    #preventScrollHandler = (event: Event) => {
-        const target = event.target as Node;
-        const scrollInDialog = this.dialog.contains(target);
-        const scrollInDrawerContent = this.contains(target);
-        const scrollInAnyDrawer =
-            target.nodeType === Node.ELEMENT_NODE ? (target as Element).closest("vaul-drawer-content") : null;
-
-        if (scrollInDialog || scrollInDrawerContent || scrollInAnyDrawer) {
-            return;
-        }
-
-        event.preventDefault();
-    };
-
-    // === Background Interaction Methods ===
-    #lockBackgroundInteraction() {
-        this.#scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-        this.#scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-
-        document.body.style.overflow = "hidden";
-        document.body.style.paddingRight = `${this.#scrollbarWidth}px`;
-        document.body.style.top = `-${this.#scrollPosition}px`;
-        document.body.style.position = "fixed";
-        document.body.style.width = "100%";
-
-        // inert attribute makes elements non-interactive for assistive technologies
-        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/inert
-        const drawerElement = this.closest("vaul-drawer");
-        Array.from(document.body.children).forEach(child => {
-            if (child === drawerElement) return;
-            if (child.tagName === "SCRIPT") return;
-
-            child.setAttribute("inert", "");
-            this.#inertElements.push(child);
-        });
-
-        document.addEventListener("wheel", this.#preventScrollHandler, { passive: false });
-        document.addEventListener("touchmove", this.#preventScrollHandler, { passive: false });
-
-        logger.debug("VaulDrawerContent: Background interaction locked");
-    }
-
-    #unlockBackgroundInteraction() {
-        document.removeEventListener("wheel", this.#preventScrollHandler);
-        document.removeEventListener("touchmove", this.#preventScrollHandler);
-
-        this.#inertElements.forEach(element => {
-            element.removeAttribute("inert");
-        });
-        this.#inertElements = [];
-
-        document.body.style.overflow = "";
-        document.body.style.paddingRight = "";
-        document.body.style.top = "";
-        document.body.style.position = "";
-        document.body.style.width = "";
-
-        window.scrollTo(0, this.#scrollPosition);
-
-        logger.debug("VaulDrawerContent: Background interaction unlocked");
-    }
-
     // === Handle Management Methods ===
     #registerDrawerHandle() {
         this.#effectCleanups.push(
             effect(() => {
                 const shouldShow = this.#showDrawerHandle.value;
+                // need to replace hanlde position when direction changes
                 const direction = this.#drawer!.direction;
 
                 logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
