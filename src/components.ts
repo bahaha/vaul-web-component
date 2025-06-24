@@ -139,6 +139,7 @@ export class VaulDrawerTrigger extends HTMLElement {
             logger.warn("VaulDrawerTrigger: No parent vaul-drawer found");
             return;
         }
+
         drawer.open = true;
     };
 }

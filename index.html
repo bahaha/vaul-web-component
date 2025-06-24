@@ -34,6 +34,24 @@
                 </p>
             </header>
 
+            <!-- Background Focus Test Buttons -->
+            <div class="fixed top-4 right-4 space-y-2 z-10">
+                <button
+                    id="bg-btn1"
+                    class="block px-3 py-2 bg-red-500 text-white text-sm rounded shadow hover:bg-red-600 focus:ring-2 focus:ring-red-300 transition-all"
+                    title="Background Button 1 - Should not be focusable when drawer is open"
+                >
+                    BG Btn 1
+                </button>
+                <button
+                    id="bg-btn2"
+                    class="block px-3 py-2 bg-orange-500 text-white text-sm rounded shadow hover:bg-orange-600 focus:ring-2 focus:ring-orange-300 transition-all"
+                    title="Background Button 2 - Should not be focusable when drawer is open"
+                >
+                    BG Btn 2
+                </button>
+            </div>
+
             <div class="bg-white rounded-lg shadow-md p-8">
                 <!-- Controls -->
                 <div class="mb-8 space-y-4">
@@ -109,7 +127,46 @@
                                         This is a basic drawer with minimal styling. Use the controls above to test
                                         different configurations.
                                     </p>
-                                    <div class="max-h-40 overflow-y-auto bg-gray-50 rounded p-3">
+
+                                    <!-- Focus Trap Demo Section -->
+                                    <div class="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+                                        <h5 class="font-semibold text-blue-800 mb-2">🎯 Focus Trap Demo</h5>
+                                        <div class="mb-3 p-2 bg-white rounded border">
+                                            <span class="text-sm font-medium text-gray-700">Currently focused: </span>
+                                            <span
+                                                id="focus-indicator"
+                                                class="text-sm font-mono bg-gray-100 px-2 py-1 rounded"
+                                                >none</span
+                                            >
+                                        </div>
+                                        <p class="text-sm text-blue-700 mb-3">
+                                            Try pressing Tab to cycle through these buttons. Focus should loop between
+                                            them without escaping to background elements:
+                                        </p>
+                                        <div class="flex gap-2 mb-2">
+                                            <button
+                                                id="drawer-btn1"
+                                                class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:bg-blue-700 focus:ring-2 focus:ring-blue-300 transition-all"
+                                            >
+                                                Button 1
+                                            </button>
+                                            <button
+                                                id="drawer-btn2"
+                                                class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:bg-green-700 focus:ring-2 focus:ring-green-300 transition-all"
+                                            >
+                                                Button 2
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-blue-600">
+                                            <strong>Expected:</strong> Tab should cycle Button 1 → Button 2 → Button 1 →
+                                            ...
+                                        </p>
+                                    </div>
+
+                                    <div
+                                        class="max-h-40 overflow-y-auto bg-gray-50 rounded p-3 focus:bg-yellow-100 focus:border-4 focus:border-yellow-500 focus:shadow-lg transition-all"
+                                        tabindex="-1"
+                                    >
                                         <h5 class="font-semibold mb-2 text-sm">Scrollable Content Within Drawer:</h5>
                                         <div class="text-xs text-gray-600 space-y-2">
                                             <p>Line 1: This content should be scrollable within the drawer.</p>
@@ -265,7 +322,8 @@
                                     • Uses <code class="bg-green-100 px-1 rounded">inert</code> attribute for focus
                                     trapping
                                 </li>
-                                <li>• Prevents tabbing to background elements</li>
+                                <li>• Prevents tabbing to background elements (red/orange buttons in top-right)</li>
+                                <li>• Cycles focus between focusable elements within drawer</li>
                                 <li>• Maintains accessibility standards</li>
                                 <li>• Works with screen readers</li>
                             </ul>
@@ -379,6 +437,46 @@
             // Demo script for milestone 1 & 2
             console.log("Vaul Web Component Demo - Milestone 1 & 2");
             console.log("Testing basic drawer structure and directional positioning");
+
+            // Focus tracking functionality
+            function updateFocusIndicator() {
+                const focusIndicator = document.getElementById("focus-indicator");
+                if (!focusIndicator) return;
+
+                const activeElement = document.activeElement;
+                let focusText = "none";
+
+                if (activeElement && activeElement !== document.body) {
+                    if (activeElement.id) {
+                        focusText = `#${activeElement.id}`;
+                    } else if (activeElement.tagName) {
+                        focusText = activeElement.tagName.toLowerCase();
+                        if (activeElement.className) {
+                            focusText += ` (${activeElement.className.split(" ").slice(0, 2).join(" ")})`;
+                        }
+                    }
+                }
+
+                focusIndicator.textContent = focusText;
+
+                // Update color based on focus location
+                if (focusText.includes("drawer-btn")) {
+                    focusIndicator.className =
+                        "text-sm font-mono bg-green-100 text-green-800 px-2 py-1 rounded border border-green-300";
+                } else if (focusText.includes("bg-btn")) {
+                    focusIndicator.className =
+                        "text-sm font-mono bg-red-100 text-red-800 px-2 py-1 rounded border border-red-300";
+                } else if (focusText.includes("div") || focusText === "none") {
+                    focusIndicator.className =
+                        "text-sm font-mono bg-yellow-100 text-yellow-800 px-2 py-1 rounded border border-yellow-300";
+                } else {
+                    focusIndicator.className = "text-sm font-mono bg-gray-100 px-2 py-1 rounded";
+                }
+            }
+
+            // Track focus changes
+            document.addEventListener("focusin", updateFocusIndicator);
+            document.addEventListener("focusout", updateFocusIndicator);
 
             // Demo control functionality
             document.addEventListener("DOMContentLoaded", function () {
