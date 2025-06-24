@@ -105,10 +105,25 @@
                                     <p class="text-gray-600 mb-4">
                                         Direction: <span id="default-direction-display">bottom</span>
                                     </p>
-                                    <p class="text-sm text-gray-500">
+                                    <p class="text-sm text-gray-500 mb-4">
                                         This is a basic drawer with minimal styling. Use the controls above to test
                                         different configurations.
                                     </p>
+                                    <div class="max-h-40 overflow-y-auto bg-gray-50 rounded p-3">
+                                        <h5 class="font-semibold mb-2 text-sm">Scrollable Content Within Drawer:</h5>
+                                        <div class="text-xs text-gray-600 space-y-2">
+                                            <p>Line 1: This content should be scrollable within the drawer.</p>
+                                            <p>Line 2: Background scrolling should be prevented.</p>
+                                            <p>Line 3: Focus should be trapped within the drawer.</p>
+                                            <p>Line 4: Try using Tab key to navigate.</p>
+                                            <p>Line 5: Try scrolling with mouse wheel.</p>
+                                            <p>Line 6: Notice how background is locked.</p>
+                                            <p>Line 7: But this content scrolls normally.</p>
+                                            <p>Line 8: This demonstrates proper scroll management.</p>
+                                            <p>Line 9: Each drawer handles its own scroll context.</p>
+                                            <p>Line 10: End of scrollable test content.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </vaul-drawer-content>
                         </vaul-drawer>
@@ -230,8 +245,40 @@
                     </div>
                 </div>
 
+                <!-- Background Interaction Prevention Info -->
+                <div class="mt-12 bg-green-50 rounded-lg p-6 border-l-4 border-green-400">
+                    <h3 class="text-xl font-bold mb-4 text-green-900">✅ Background Interaction Prevention</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-semibold text-green-800 mb-2">🔒 Scroll Lock</h4>
+                            <ul class="text-sm text-green-700 space-y-1">
+                                <li>• Prevents background scrolling when drawer is open</li>
+                                <li>• Preserves scrollbar width to prevent layout shift</li>
+                                <li>• Allows scrolling within drawer content</li>
+                                <li>• Restores scroll position when drawer closes</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 shadow-sm">
+                            <h4 class="font-semibold text-green-800 mb-2">🎯 Focus Trap</h4>
+                            <ul class="text-sm text-green-700 space-y-1">
+                                <li>
+                                    • Uses <code class="bg-green-100 px-1 rounded">inert</code> attribute for focus
+                                    trapping
+                                </li>
+                                <li>• Prevents tabbing to background elements</li>
+                                <li>• Maintains accessibility standards</li>
+                                <li>• Works with screen readers</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="text-sm text-green-600">
+                        <strong>Try it:</strong> Open a drawer and try scrolling the background or using Tab to navigate
+                        - interactions are properly blocked while the drawer content remains fully functional.
+                    </p>
+                </div>
+
                 <!-- Custom Handle Demo -->
-                <div class="mt-12 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-6">
+                <div class="mt-8 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg p-6">
                     <h3 class="text-xl font-bold mb-4 text-center">Custom Handle Example</h3>
                     <div class="flex justify-center">
                         <vaul-drawer direction="bottom">
@@ -274,6 +321,54 @@
                                 </div>
                             </vaul-drawer-content>
                         </vaul-drawer>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add scrollable content to test scroll prevention -->
+        <div class="container mx-auto px-4 py-8">
+            <div class="bg-gray-100 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">Scrollable Test Content</h3>
+                <p class="text-gray-600 mb-4">
+                    This content is here to test the scroll prevention functionality. When a drawer is open, you should
+                    not be able to scroll this background content.
+                </p>
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded shadow">
+                        <h4 class="font-semibold mb-2">Test Section 1</h4>
+                        <p class="text-sm text-gray-600">
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua.
+                        </p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h4 class="font-semibold mb-2">Test Section 2</h4>
+                        <p class="text-sm text-gray-600">
+                            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                            commodo consequat.
+                        </p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h4 class="font-semibold mb-2">Test Section 3</h4>
+                        <p class="text-sm text-gray-600">
+                            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                            pariatur.
+                        </p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h4 class="font-semibold mb-2">Test Section 4</h4>
+                        <p class="text-sm text-gray-600">
+                            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit
+                            anim id est laborum.
+                        </p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow">
+                        <h4 class="font-semibold mb-2">Test Section 5</h4>
+                        <p class="text-sm text-gray-600">
+                            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
+                            laudantium.
+                        </p>
                     </div>
                 </div>
             </div>

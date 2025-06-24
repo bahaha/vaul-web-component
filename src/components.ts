@@ -85,7 +85,13 @@ export class VaulDrawer extends HTMLElement {
     set open(value: boolean) {
         this.#open.value = value;
         if (!this.dialogRef) return;
-        if (value) this.dialogRef.showModal();
+
+        if (value) {
+            this.dialogRef.showModal();
+        } else {
+            // Change open to false wiill make data-state="closed", which will trigger the exit animation
+            // We need to wait for the animation to finish to close the dialog, and then unlock the background interaction
+        }
     }
 
     get dialogRef() {
@@ -143,6 +149,11 @@ export class VaulDrawerContent extends HTMLElement {
     #builtInHandle?: HTMLElement;
     #effectCleanups: (() => void)[] = [];
 
+    // Background interaction prevention
+    #scrollPosition = 0;
+    #scrollbarWidth = 0;
+    #inertElements: Element[] = [];
+
     #showDrawerHandle = computed(() => {
         if (!this.#drawer) return false;
 
@@ -157,6 +168,7 @@ export class VaulDrawerContent extends HTMLElement {
         "show-handle": createBooleanParser(true),
     });
 
+    // === Web Component Lifecycle ===
     constructor() {
         super();
     }
@@ -172,20 +184,11 @@ export class VaulDrawerContent extends HTMLElement {
         }
 
         if (!this.#drawer) return;
+        this.#registerDrawerHandle();
         this.#effectCleanups.push(
             effect(() => {
-                const shouldShow = this.#showDrawerHandle.value;
-                const direction = this.#drawer!.direction;
-
-                logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
-
-                if (shouldShow) {
-                    // Remove existing handle first to reposition it for direction changes
-                    this.#removeBuiltInHandle();
-                    this.#addBuiltInHandle();
-                } else {
-                    this.#removeBuiltInHandle();
-                }
+                if (!this.#drawer) return;
+                if (this.#drawer.open) this.#lockBackgroundInteraction();
             })
         );
     }
@@ -202,12 +205,28 @@ export class VaulDrawerContent extends HTMLElement {
         }
     }
 
-    get showHandle() {
-        return this.#showHandle.value;
+    disconnectedCallback() {
+        this.dialog?.removeEventListener("animationend", this.#closeDialog);
+        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
+        this.dialog?.removeEventListener("click", this.#handleDialogClick);
+        window.removeEventListener("keydown", this.#handleKeyDown, true);
+
+        this.#unlockBackgroundInteraction();
+
+        this.#effectCleanups.forEach(cleanup => cleanup());
+        this.#effectCleanups = [];
     }
 
-    set showHandle(value: boolean) {
-        this.#showHandle.value = value;
+    // === Setup Methods ===
+    #render() {
+        const shadow = this.attachShadow({ mode: "open" });
+        const style = document.createElement("style");
+        style.textContent = contentStyles;
+        this.dialog = document.createElement("dialog");
+        const slot = document.createElement("slot");
+        shadow.appendChild(style);
+        shadow.appendChild(this.dialog);
+        this.dialog.appendChild(slot);
     }
 
     #setupDrawerRef() {
@@ -238,20 +257,13 @@ export class VaulDrawerContent extends HTMLElement {
         window.addEventListener("keydown", this.#handleKeyDown, true);
     }
 
-    disconnectedCallback() {
-        this.dialog?.removeEventListener("animationend", this.#closeDialog);
-        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
-        this.dialog?.removeEventListener("click", this.#handleDialogClick);
-        window.removeEventListener("keydown", this.#handleKeyDown, true);
-        this.#effectCleanups.forEach(cleanup => cleanup());
-        this.#effectCleanups = [];
-    }
-
+    // === Event Handlers ===
     #closeDialog = (event: AnimationEvent) => {
         if (event.target !== this.dialog || !this.#drawer) return;
 
         if (event.animationName.startsWith("slide-to-")) {
             this.dialog.close();
+            this.#unlockBackgroundInteraction();
         }
     };
 
@@ -281,15 +293,85 @@ export class VaulDrawerContent extends HTMLElement {
         this.#drawer.open = false;
     };
 
-    #render() {
-        const shadow = this.attachShadow({ mode: "open" });
-        const style = document.createElement("style");
-        style.textContent = contentStyles;
-        this.dialog = document.createElement("dialog");
-        const slot = document.createElement("slot");
-        shadow.appendChild(style);
-        shadow.appendChild(this.dialog);
-        this.dialog.appendChild(slot);
+    #preventScrollHandler = (event: Event) => {
+        const target = event.target as Node;
+        const scrollInDialog = this.dialog.contains(target);
+        const scrollInDrawerContent = this.contains(target);
+        const scrollInAnyDrawer =
+            target.nodeType === Node.ELEMENT_NODE ? (target as Element).closest("vaul-drawer-content") : null;
+
+        if (scrollInDialog || scrollInDrawerContent || scrollInAnyDrawer) {
+            return;
+        }
+
+        event.preventDefault();
+    };
+
+    // === Background Interaction Methods ===
+    #lockBackgroundInteraction() {
+        this.#scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+        this.#scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+        document.body.style.overflow = "hidden";
+        document.body.style.paddingRight = `${this.#scrollbarWidth}px`;
+        document.body.style.top = `-${this.#scrollPosition}px`;
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+
+        // inert attribute makes elements non-interactive for assistive technologies
+        // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/inert
+        const drawerElement = this.closest("vaul-drawer");
+        Array.from(document.body.children).forEach(child => {
+            if (child === drawerElement) return;
+            if (child.tagName === "SCRIPT") return;
+
+            child.setAttribute("inert", "");
+            this.#inertElements.push(child);
+        });
+
+        document.addEventListener("wheel", this.#preventScrollHandler, { passive: false });
+        document.addEventListener("touchmove", this.#preventScrollHandler, { passive: false });
+
+        logger.debug("VaulDrawerContent: Background interaction locked");
+    }
+
+    #unlockBackgroundInteraction() {
+        document.removeEventListener("wheel", this.#preventScrollHandler);
+        document.removeEventListener("touchmove", this.#preventScrollHandler);
+
+        this.#inertElements.forEach(element => {
+            element.removeAttribute("inert");
+        });
+        this.#inertElements = [];
+
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+        document.body.style.top = "";
+        document.body.style.position = "";
+        document.body.style.width = "";
+
+        window.scrollTo(0, this.#scrollPosition);
+
+        logger.debug("VaulDrawerContent: Background interaction unlocked");
+    }
+
+    // === Handle Management Methods ===
+    #registerDrawerHandle() {
+        this.#effectCleanups.push(
+            effect(() => {
+                const shouldShow = this.#showDrawerHandle.value;
+                const direction = this.#drawer!.direction;
+
+                logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
+
+                if (shouldShow) {
+                    this.#removeBuiltInHandle();
+                    this.#addBuiltInHandle();
+                } else {
+                    this.#removeBuiltInHandle();
+                }
+            })
+        );
     }
 
     #addBuiltInHandle() {
@@ -314,6 +396,15 @@ export class VaulDrawerContent extends HTMLElement {
         this.#builtInHandle.parentNode.removeChild(this.#builtInHandle);
         this.#builtInHandle = undefined;
         logger.debug("VaulDrawerContent: Built-in handle removed");
+    }
+
+    // === Getters & Setters ===
+    get showHandle() {
+        return this.#showHandle.value;
+    }
+
+    set showHandle(value: boolean) {
+        this.#showHandle.value = value;
     }
 }
 
