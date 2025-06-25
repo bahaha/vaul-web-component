@@ -5,6 +5,7 @@ import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
 import { signal, effect, computed } from "@preact/signals";
 import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
+import { ScrollManager } from "./utils/scroll-manager";
 const camelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
 const supportedDirections = ["top", "bottom", "left", "right"] as const;
@@ -85,7 +86,13 @@ export class VaulDrawer extends HTMLElement {
     set open(value: boolean) {
         this.#open.value = value;
         if (!this.dialogRef) return;
-        if (value) this.dialogRef.showModal();
+
+        if (value) {
+            this.dialogRef.showModal();
+        } else {
+            // Change open to false wiill make data-state="closed", which will trigger the exit animation
+            // We need to wait for the animation to finish to close the dialog, and then unlock the background interaction
+        }
     }
 
     get dialogRef() {
@@ -132,6 +139,7 @@ export class VaulDrawerTrigger extends HTMLElement {
             logger.warn("VaulDrawerTrigger: No parent vaul-drawer found");
             return;
         }
+
         drawer.open = true;
     };
 }
@@ -142,6 +150,7 @@ export class VaulDrawerContent extends HTMLElement {
     #showHandle = signal<boolean>(true);
     #builtInHandle?: HTMLElement;
     #effectCleanups: (() => void)[] = [];
+    #scrollManager!: ScrollManager;
 
     #showDrawerHandle = computed(() => {
         if (!this.#drawer) return false;
@@ -157,6 +166,7 @@ export class VaulDrawerContent extends HTMLElement {
         "show-handle": createBooleanParser(true),
     });
 
+    // === Web Component Lifecycle ===
     constructor() {
         super();
     }
@@ -172,21 +182,10 @@ export class VaulDrawerContent extends HTMLElement {
         }
 
         if (!this.#drawer) return;
+        this.#registerDrawerHandle();
+        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
         this.#effectCleanups.push(
-            effect(() => {
-                const shouldShow = this.#showDrawerHandle.value;
-                const direction = this.#drawer!.direction;
-
-                logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
-
-                if (shouldShow) {
-                    // Remove existing handle first to reposition it for direction changes
-                    this.#removeBuiltInHandle();
-                    this.#addBuiltInHandle();
-                } else {
-                    this.#removeBuiltInHandle();
-                }
-            })
+            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
         );
     }
 
@@ -202,12 +201,28 @@ export class VaulDrawerContent extends HTMLElement {
         }
     }
 
-    get showHandle() {
-        return this.#showHandle.value;
+    disconnectedCallback() {
+        this.dialog?.removeEventListener("animationend", this.#closeDialog);
+        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
+        this.dialog?.removeEventListener("click", this.#handleDialogClick);
+        window.removeEventListener("keydown", this.#handleKeyDown, true);
+
+        this.#scrollManager.destroy();
+
+        this.#effectCleanups.forEach(cleanup => cleanup());
+        this.#effectCleanups = [];
     }
 
-    set showHandle(value: boolean) {
-        this.#showHandle.value = value;
+    // === Setup Methods ===
+    #render() {
+        const shadow = this.attachShadow({ mode: "open" });
+        const style = document.createElement("style");
+        style.textContent = contentStyles;
+        this.dialog = document.createElement("dialog");
+        const slot = document.createElement("slot");
+        shadow.appendChild(style);
+        shadow.appendChild(this.dialog);
+        this.dialog.appendChild(slot);
     }
 
     #setupDrawerRef() {
@@ -238,15 +253,7 @@ export class VaulDrawerContent extends HTMLElement {
         window.addEventListener("keydown", this.#handleKeyDown, true);
     }
 
-    disconnectedCallback() {
-        this.dialog?.removeEventListener("animationend", this.#closeDialog);
-        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
-        this.dialog?.removeEventListener("click", this.#handleDialogClick);
-        window.removeEventListener("keydown", this.#handleKeyDown, true);
-        this.#effectCleanups.forEach(cleanup => cleanup());
-        this.#effectCleanups = [];
-    }
-
+    // === Event Handlers ===
     #closeDialog = (event: AnimationEvent) => {
         if (event.target !== this.dialog || !this.#drawer) return;
 
@@ -281,15 +288,24 @@ export class VaulDrawerContent extends HTMLElement {
         this.#drawer.open = false;
     };
 
-    #render() {
-        const shadow = this.attachShadow({ mode: "open" });
-        const style = document.createElement("style");
-        style.textContent = contentStyles;
-        this.dialog = document.createElement("dialog");
-        const slot = document.createElement("slot");
-        shadow.appendChild(style);
-        shadow.appendChild(this.dialog);
-        this.dialog.appendChild(slot);
+    // === Handle Management Methods ===
+    #registerDrawerHandle() {
+        this.#effectCleanups.push(
+            effect(() => {
+                const shouldShow = this.#showDrawerHandle.value;
+                // need to replace hanlde position when direction changes
+                const direction = this.#drawer!.direction;
+
+                logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
+
+                if (shouldShow) {
+                    this.#removeBuiltInHandle();
+                    this.#addBuiltInHandle();
+                } else {
+                    this.#removeBuiltInHandle();
+                }
+            })
+        );
     }
 
     #addBuiltInHandle() {
@@ -314,6 +330,15 @@ export class VaulDrawerContent extends HTMLElement {
         this.#builtInHandle.parentNode.removeChild(this.#builtInHandle);
         this.#builtInHandle = undefined;
         logger.debug("VaulDrawerContent: Built-in handle removed");
+    }
+
+    // === Getters & Setters ===
+    get showHandle() {
+        return this.#showHandle.value;
+    }
+
+    set showHandle(value: boolean) {
+        this.#showHandle.value = value;
     }
 }
 
