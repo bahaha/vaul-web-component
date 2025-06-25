@@ -6,10 +6,9 @@ import { logger } from "./logger";
 import { signal, effect, computed } from "@preact/signals";
 import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
 import { ScrollManager } from "./utils/scroll-manager";
+import { GestureManager } from "./utils/gesture-manager";
+import { type Direction, supportedDirections } from "./types";
 const camelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-
-const supportedDirections = ["top", "bottom", "left", "right"] as const;
-export type Direction = (typeof supportedDirections)[number];
 
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
@@ -151,6 +150,7 @@ export class VaulDrawerContent extends HTMLElement {
     #builtInHandle?: HTMLElement;
     #effectCleanups: (() => void)[] = [];
     #scrollManager!: ScrollManager;
+    #gestureManager!: GestureManager;
 
     #showDrawerHandle = computed(() => {
         if (!this.#drawer) return false;
@@ -183,10 +183,8 @@ export class VaulDrawerContent extends HTMLElement {
 
         if (!this.#drawer) return;
         this.#registerDrawerHandle();
-        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
-        this.#effectCleanups.push(
-            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
-        );
+        this.#setupGestureManager();
+        this.#setupScrollManager();
     }
 
     static get observedAttributes() {
@@ -207,7 +205,14 @@ export class VaulDrawerContent extends HTMLElement {
         this.dialog?.removeEventListener("click", this.#handleDialogClick);
         window.removeEventListener("keydown", this.#handleKeyDown, true);
 
+        // Remove gesture listeners
+        this.dialog?.removeEventListener("pointerdown", this.#handlePointerDown);
+        this.dialog?.removeEventListener("pointermove", this.#handlePointerMove);
+        this.dialog?.removeEventListener("pointerup", this.#handlePointerUp);
+        this.dialog?.removeEventListener("pointerout", this.#handlePointerOut);
+        this.dialog?.removeEventListener("contextmenu", this.#handleContextMenu);
         this.#scrollManager.destroy();
+        this.#gestureManager.destroy();
 
         this.#effectCleanups.forEach(cleanup => cleanup());
         this.#effectCleanups = [];
@@ -240,6 +245,13 @@ export class VaulDrawerContent extends HTMLElement {
         this.#effectCleanups.push(
             effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed"))
         );
+
+        this.#effectCleanups.push(
+            effect(() => {
+                if (!this.#gestureManager) return;
+                this.#gestureManager.direction = this.#drawer!.direction;
+            })
+        );
     }
 
     #setupAnimationListeners() {
@@ -253,12 +265,72 @@ export class VaulDrawerContent extends HTMLElement {
         window.addEventListener("keydown", this.#handleKeyDown, true);
     }
 
+    #setupScrollManager() {
+        if (!this.#drawer) return;
+        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
+        this.#effectCleanups.push(
+            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
+        );
+    }
+
+    #setupGestureManager() {
+        if (!this.#drawer) return;
+
+        this.#gestureManager = new GestureManager({
+            direction: this.#drawer.direction,
+            onDragStart: () => {
+                console.log("🔥 DRAG START - Disabling animation and transition");
+                this.dialog.style.transition = "none";
+                this.dialog.style.animationName = "none";
+            },
+            onDrag: (transform: string) => {
+                console.log("🔥 DRAG - Applying transform:", transform);
+                console.log("  - dialog element:", this.dialog);
+                console.log("  - dialog computed style transform BEFORE:", getComputedStyle(this.dialog).transform);
+
+                this.dialog.style.transform = transform;
+
+                console.log("  - dialog style transform AFTER:", this.dialog.style.transform);
+                console.log("  - dialog computed style transform AFTER:", getComputedStyle(this.dialog).transform);
+            },
+            onDragEnd: (shouldDismiss: boolean) => {
+                console.log("🔥 DRAG END - shouldDismiss:", shouldDismiss);
+
+                if (shouldDismiss && this.#drawer?.dismissible) {
+                    // Get current transform position
+                    const currentTransform = this.dialog.style.transform;
+
+                    // Set CSS custom property to current position for animation starting point
+                    this.dialog.style.setProperty("--current-transform", currentTransform);
+
+                    // Restore animation and trigger close through normal flow
+                    this.dialog.style.animationName = "";
+                    this.dialog.style.transition = "";
+                    this.#drawer.open = false;
+                } else {
+                    // Snap back to original position with smooth transition
+                    this.dialog.style.transition = "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)";
+                    this.dialog.style.animationName = ""; // Restore animation
+                    this.dialog.style.transform = "";
+                }
+            },
+        });
+
+        this.dialog.addEventListener("pointerdown", this.#handlePointerDown);
+        this.dialog.addEventListener("pointermove", this.#handlePointerMove);
+        this.dialog.addEventListener("pointerup", this.#handlePointerUp);
+        this.dialog.addEventListener("pointerout", this.#handlePointerOut);
+        this.dialog.addEventListener("contextmenu", this.#handleContextMenu);
+    }
+
     // === Event Handlers ===
     #closeDialog = (event: AnimationEvent) => {
         if (event.target !== this.dialog || !this.#drawer) return;
 
         if (event.animationName.startsWith("slide-to-")) {
             this.dialog.close();
+            // Clear the custom transform property
+            this.dialog.style.removeProperty("--current-transform");
         }
     };
 
@@ -286,6 +358,71 @@ export class VaulDrawerContent extends HTMLElement {
         if (!this.#drawer.dismissible) return;
 
         this.#drawer.open = false;
+    };
+
+    // === Gesture Event Handlers ===
+    #handlePointerDown = (event: PointerEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+
+        logger.debug("VaulDrawerContent: Pointer down", {
+            x: event.pageX,
+            y: event.pageY,
+            pointerId: event.pointerId,
+        });
+
+        // Capture pointer for target element to ensure we get move/up events even outside bounds
+        (event.target as HTMLElement).setPointerCapture(event.pointerId);
+
+        this.#gestureManager.handlePointerDown(event);
+    };
+
+    #handlePointerMove = (event: PointerEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+
+        logger.debug("VaulDrawerContent: Pointer move", {
+            x: event.pageX,
+            y: event.pageY,
+            gesture: this.#gestureManager.gesture,
+        });
+
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        this.#gestureManager.handlePointerMove(event);
+    };
+
+    #handlePointerUp = (event: PointerEvent) => {
+        if (!this.#drawer) return;
+
+        logger.debug("VaulDrawerContent: Pointer up", {
+            x: event.pageX,
+            y: event.pageY,
+            pointerId: event.pointerId,
+            target: event.target,
+            currentTarget: event.currentTarget,
+        });
+
+        this.#gestureManager.handlePointerUp(event);
+    };
+
+    #handlePointerOut = (event: PointerEvent) => {
+        if (!this.#drawer) return;
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        this.#gestureManager.handlePointerUp(event);
+    };
+
+    #handleContextMenu = (_event: Event) => {
+        if (!this.#drawer) return;
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        // Convert to PointerEvent-like object for consistency
+        const syntheticEvent = new PointerEvent("pointerup", {
+            clientX: 0,
+            clientY: 0,
+            pointerId: 1,
+        });
+
+        this.#gestureManager.handlePointerUp(syntheticEvent);
     };
 
     // === Handle Management Methods ===

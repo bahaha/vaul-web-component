@@ -17,6 +17,7 @@ dialog {
     animation-duration: var(--vaul-drawer-duration);
     animation-timing-function: var(--vaul-drawer-timing);
     animation-fill-mode: both;
+    touch-action: none;
     /* Drawer handle will be cutting off with overflow: auto; */
     overflow: visible;
 
@@ -119,6 +120,9 @@ dialog[data-direction="right"] {
 }
 
 @keyframes slide-to-bottom {
+    from {
+        transform: var(--current-transform, translate3d(0, 0, 0));
+    }
     to {
         transform: translate3d(0, var(--initial-transform, 100%), 0);
     }
@@ -134,6 +138,9 @@ dialog[data-direction="right"] {
 }
 
 @keyframes slide-to-top {
+    from {
+        transform: var(--current-transform, translate3d(0, 0, 0));
+    }
     to {
         transform: translate3d(0, calc(var(--initial-transform, 100%) * -1), 0);
     }
@@ -149,6 +156,9 @@ dialog[data-direction="right"] {
 }
 
 @keyframes slide-to-left {
+    from {
+        transform: var(--current-transform, translate3d(0, 0, 0));
+    }
     to {
         transform: translate3d(calc(var(--initial-transform, 100%) * -1), 0, 0);
     }
@@ -164,6 +174,9 @@ dialog[data-direction="right"] {
 }
 
 @keyframes slide-to-right {
+    from {
+        transform: var(--current-transform, translate3d(0, 0, 0));
+    }
     to {
         transform: translate3d(var(--initial-transform, 100%), 0, 0);
     }
