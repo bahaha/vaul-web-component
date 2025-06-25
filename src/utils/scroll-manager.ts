@@ -95,7 +95,7 @@ export class ScrollManager {
     }
 
     #addScrollListeners(): void {
-        document.addEventListener("wheel", this.#preventScrollHandler, { passive: false });
+        document.addEventListener("wheel", this.#preventScrollHandler, { passive: true });
         document.addEventListener("touchmove", this.#preventScrollHandler, { passive: false });
     }
 
@@ -108,7 +108,6 @@ export class ScrollManager {
         const target = event.target as Node;
 
         if (this.#options.shouldAllowScroll?.(target)) {
-            event.preventDefault();
             return;
         }
 
