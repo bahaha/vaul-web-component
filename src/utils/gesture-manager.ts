@@ -11,6 +11,10 @@ function assert(condition: boolean, message: string): void {
     }
 }
 
+function dampenValue(value: number): number {
+    return 8 * (Math.log(Math.abs(value) + 1) - 2);
+}
+
 export type GestureState = "idle" | "dragging";
 
 export interface DragPosition {
@@ -95,16 +99,43 @@ export class GestureManager {
     });
 
     #shouldDismiss = computed(() => {
+        const isOverdragging = this.#isOverdragging.value;
+        if (isOverdragging) return false;
+
         const isQuickSwipe = this.#velocity.value >= this.#velocityThreshold.value;
         const isLongDraggedDistance = this.#distance.value >= this.#closeThreshold.value;
 
         return this.#dismissible.value && (isQuickSwipe || isLongDraggedDistance);
     });
 
+    #isOverdragging = computed(() => {
+        const position = this.#position.value;
+        const direction = this.#direction.value;
+
+        if (direction === "bottom") return position.y < 0; // Dragging up = overdrag
+        if (direction === "top") return position.y > 0; // Dragging down = overdrag
+        if (direction === "right") return position.x < 0; // Dragging left = overdrag
+        if (direction === "left") return position.x > 0; // Dragging right = overdrag
+
+        return false;
+    });
+
     #transform = computed(() => {
         const position = this.#position.value;
         const isVertical = this.#isVertical.value;
-        return isVertical ? `translate3d(0, ${position.y}px, 0)` : `translate3d(${position.x}px, 0, 0)`;
+        const isOverdragging = this.#isOverdragging.value;
+
+        let translateValue: number;
+
+        if (isOverdragging) {
+            // Apply dampening for overdrag - reduce magnitude but preserve direction
+            const draggedDistance = isVertical ? position.y : position.x;
+            translateValue = Math.sign(draggedDistance) * dampenValue(Math.abs(draggedDistance));
+        } else {
+            translateValue = isVertical ? position.y : position.x;
+        }
+
+        return isVertical ? `translate3d(0, ${translateValue}px, 0)` : `translate3d(${translateValue}px, 0, 0)`;
     });
 
     constructor(options: GestureManagerOptions = {}) {

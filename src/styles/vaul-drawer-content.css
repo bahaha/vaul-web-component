@@ -19,6 +19,9 @@ dialog {
     touch-action: none;
     /* Drawer handle will be cutting off with overflow: auto; */
     overflow: visible;
+    /* Improve rendering during transforms */
+    will-change: transform;
+    backface-visibility: hidden;
 
     &::backdrop {
         background: var(--vaul-drawer-backdrop);
@@ -33,6 +36,14 @@ dialog {
 
     &[data-state="closed"]::backdrop {
         animation-name: fade-out;
+    }
+
+    /* Extend drawer height for overdrag with ::after pseudo-element */
+    &::after {
+        content: "";
+        position: absolute;
+        background: inherit;
+        background-color: inherit;
     }
 }
 
@@ -56,6 +67,14 @@ dialog[data-direction="top"] {
     &[data-state="closed"] {
         animation-name: slide-to-top;
     }
+
+    &::after {
+        top: initial;
+        bottom: calc(100% - 1px);
+        left: 0;
+        right: 0;
+        height: 200%;
+    }
 }
 
 dialog[data-direction="bottom"] {
@@ -69,6 +88,14 @@ dialog[data-direction="bottom"] {
 
     &[data-state="closed"] {
         animation-name: slide-to-bottom;
+    }
+
+    &::after {
+        top: calc(100% - 1px);
+        bottom: initial;
+        left: 0;
+        right: 0;
+        height: 200%;
     }
 }
 
@@ -92,6 +119,14 @@ dialog[data-direction="left"] {
     &[data-state="closed"] {
         animation-name: slide-to-left;
     }
+
+    &::after {
+        top: 0;
+        bottom: 0;
+        left: initial;
+        right: calc(100% - 1px);
+        width: 200%;
+    }
 }
 
 dialog[data-direction="right"] {
@@ -105,6 +140,14 @@ dialog[data-direction="right"] {
 
     &[data-state="closed"] {
         animation-name: slide-to-right;
+    }
+
+    &::after {
+        top: 0;
+        bottom: 0;
+        left: calc(100% - 1px);
+        right: initial;
+        width: 200%;
     }
 }
 
