@@ -12,6 +12,12 @@ if (!HTMLDialogElement.prototype.close) {
     };
 }
 
+// Mock window.scrollTo for JSDOM
+Object.defineProperty(window, "scrollTo", {
+    value: () => {},
+    writable: true,
+});
+
 // Helper for creating animation events in JSDOM
 export const createAnimationEvent = (type: string, animationName: string) => {
     const event = new Event(type);

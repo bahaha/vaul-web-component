@@ -20,6 +20,7 @@ export class VaulDrawer extends HTMLElement {
         const direction = this.#direction.value;
         return direction === "top" || direction === "bottom";
     });
+    #propsSubscriptions: Map<number, () => void> = new Map();
 
     private static parsers = createAttributeParsers({
         direction: createEnumParser({ name: "direction", validValues: supportedDirections, defaultValue: "bottom" }),
@@ -37,6 +38,10 @@ export class VaulDrawer extends HTMLElement {
         }
     }
 
+    disconnectedCallback() {
+        this.#propsSubscriptions.forEach(cleanup => cleanup());
+    }
+
     static get observedAttributes() {
         return VaulDrawer.parsers.getObservedAttributes();
     }
@@ -47,6 +52,15 @@ export class VaulDrawer extends HTMLElement {
         if (parser && typeof parser === "function") {
             (this as any)[name] = parser(newValue);
         }
+    }
+
+    watch(prop: "direction" | "dismissible", callback: (newValue: any) => void): () => void {
+        const key = Math.floor(Math.random() * 1000000);
+        this.#propsSubscriptions.set(
+            key,
+            effect(() => callback(this[prop]))
+        );
+        return () => this.#propsSubscriptions.delete(key);
     }
 
     #render() {
@@ -200,20 +214,6 @@ export class VaulDrawerContent extends HTMLElement {
     }
 
     disconnectedCallback() {
-        this.dialog?.removeEventListener("animationend", this.#closeDialog);
-        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
-        this.dialog?.removeEventListener("click", this.#handleDialogClick);
-        window.removeEventListener("keydown", this.#handleKeyDown, true);
-
-        // Remove gesture listeners
-        this.dialog?.removeEventListener("pointerdown", this.#handlePointerDown);
-        this.dialog?.removeEventListener("pointermove", this.#handlePointerMove);
-        this.dialog?.removeEventListener("pointerup", this.#handlePointerUp);
-        this.dialog?.removeEventListener("pointerout", this.#handlePointerOut);
-        this.dialog?.removeEventListener("contextmenu", this.#handleContextMenu);
-        this.#scrollManager.destroy();
-        this.#gestureManager.destroy();
-
         this.#effectCleanups.forEach(cleanup => cleanup());
         this.#effectCleanups = [];
     }
@@ -240,17 +240,11 @@ export class VaulDrawerContent extends HTMLElement {
 
     #bindDrawerAttributes() {
         if (!this.#drawer) return;
-
-        this.#effectCleanups.push(effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)));
         this.#effectCleanups.push(
-            effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed"))
-        );
-
-        this.#effectCleanups.push(
-            effect(() => {
-                if (!this.#gestureManager) return;
-                this.#gestureManager.direction = this.#drawer!.direction;
-            })
+            ...[
+                effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)),
+                effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed")),
+            ]
         );
     }
 
@@ -263,6 +257,13 @@ export class VaulDrawerContent extends HTMLElement {
         // - issues.chromium.org/issues/346597066
         // - issues.chromium.org/issues/41491338
         window.addEventListener("keydown", this.#handleKeyDown, true);
+
+        this.#effectCleanups.push(() => {
+            this.dialog?.removeEventListener("animationend", this.#closeDialog);
+            this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
+            this.dialog?.removeEventListener("click", this.#handleDialogClick);
+            window.removeEventListener("keydown", this.#handleKeyDown, true);
+        });
     }
 
     #setupScrollManager() {
@@ -271,6 +272,7 @@ export class VaulDrawerContent extends HTMLElement {
         this.#effectCleanups.push(
             effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
         );
+        this.#effectCleanups.push(() => this.#scrollManager.destroy());
     }
 
     #setupGestureManager() {
@@ -278,49 +280,46 @@ export class VaulDrawerContent extends HTMLElement {
 
         this.#gestureManager = new GestureManager({
             direction: this.#drawer.direction,
-            onDragStart: () => {
-                console.log("🔥 DRAG START - Disabling animation and transition");
-                this.dialog.style.transition = "none";
-                this.dialog.style.animationName = "none";
+            dismissible: this.#drawer?.dismissible ?? true,
+            getTargetDimensions: () => {
+                const rect = this.dialog.getBoundingClientRect();
+                return { width: rect.width, height: rect.height };
             },
-            onDrag: (transform: string) => {
-                console.log("🔥 DRAG - Applying transform:", transform);
-                console.log("  - dialog element:", this.dialog);
-                console.log("  - dialog computed style transform BEFORE:", getComputedStyle(this.dialog).transform);
-
-                this.dialog.style.transform = transform;
-
-                console.log("  - dialog style transform AFTER:", this.dialog.style.transform);
-                console.log("  - dialog computed style transform AFTER:", getComputedStyle(this.dialog).transform);
-            },
-            onDragEnd: (shouldDismiss: boolean) => {
-                console.log("🔥 DRAG END - shouldDismiss:", shouldDismiss);
-
-                if (shouldDismiss && this.#drawer?.dismissible) {
-                    // Get current transform position
-                    const currentTransform = this.dialog.style.transform;
-
-                    // Set CSS custom property to current position for animation starting point
-                    this.dialog.style.setProperty("--current-transform", currentTransform);
-
-                    // Restore animation and trigger close through normal flow
-                    this.dialog.style.animationName = "";
-                    this.dialog.style.transition = "";
-                    this.#drawer.open = false;
-                } else {
-                    // Snap back to original position with smooth transition
-                    this.dialog.style.transition = "transform 0.5s cubic-bezier(0.32, 0.72, 0, 1)";
-                    this.dialog.style.animationName = ""; // Restore animation
-                    this.dialog.style.transform = "";
+            onDragStart: () => (this.dialog.style.transition = "none"),
+            onDrag: (transform: string) => (this.dialog.style.transform = transform),
+            onDragEnd: (shouldDismiss: boolean, transform: string | null) => {
+                this.dialog.style.transition = "transform var(--vaul-drawer-duration) var(--vaul-drawer-timing)";
+                if (transform) {
+                    this.dialog.style.transform = transform;
+                }
+                if (shouldDismiss) {
+                    this.#drawer!.open = false;
                 }
             },
         });
+
+        const propsWatchers = [
+            this.#drawer.watch("direction", direction => (this.#gestureManager.direction = direction)),
+            this.#drawer.watch("dismissible", dismissible => (this.#gestureManager.dismissible = dismissible)),
+        ];
 
         this.dialog.addEventListener("pointerdown", this.#handlePointerDown);
         this.dialog.addEventListener("pointermove", this.#handlePointerMove);
         this.dialog.addEventListener("pointerup", this.#handlePointerUp);
         this.dialog.addEventListener("pointerout", this.#handlePointerOut);
         this.dialog.addEventListener("contextmenu", this.#handleContextMenu);
+
+        this.#effectCleanups.push(() => {
+            propsWatchers.forEach(cleanup => cleanup());
+
+            this.dialog?.removeEventListener("pointerdown", this.#handlePointerDown);
+            this.dialog?.removeEventListener("pointermove", this.#handlePointerMove);
+            this.dialog?.removeEventListener("pointerup", this.#handlePointerUp);
+            this.dialog?.removeEventListener("pointerout", this.#handlePointerOut);
+            this.dialog?.removeEventListener("contextmenu", this.#handleContextMenu);
+
+            this.#gestureManager.destroy();
+        });
     }
 
     // === Event Handlers ===
@@ -329,8 +328,8 @@ export class VaulDrawerContent extends HTMLElement {
 
         if (event.animationName.startsWith("slide-to-")) {
             this.dialog.close();
-            // Clear the custom transform property
-            this.dialog.style.removeProperty("--current-transform");
+            // Reset the drawer position to avoid memoried transform while reopen
+            this.dialog.style.transform = "";
         }
     };
 
@@ -369,9 +368,6 @@ export class VaulDrawerContent extends HTMLElement {
             y: event.pageY,
             pointerId: event.pointerId,
         });
-
-        // Capture pointer for target element to ensure we get move/up events even outside bounds
-        (event.target as HTMLElement).setPointerCapture(event.pointerId);
 
         this.#gestureManager.handlePointerDown(event);
     };
