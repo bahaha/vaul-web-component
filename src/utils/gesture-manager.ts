@@ -48,13 +48,13 @@ export class GestureManager {
     #pointerStart = signal<{ x: number; y: number } | null>(null);
     #currentPointer = signal<DragPosition>({ x: 0, y: 0 });
     #lastPointer = signal<DragPosition>({ x: 0, y: 0 });
-    #currentTime = signal<number>(0);
-    #lastTime = signal<number>(0);
-    #effectCleanups: (() => void)[] = [];
+    #dragStartTime = signal<number>(0);
+    #releaseTime = signal<number>(0);
     #velocityThreshold = signal<number>(DEFAULT_VELOCITY_THRESHOLD);
     #closeThreshold = signal<number>(DEFAULT_CLOSE_THRESHOLD);
     #getTargetDimensions?: () => { width: number; height: number } | null;
     #callbacks: Required<Pick<GestureManagerOptions, "onDragStart" | "onDrag" | "onDragEnd">>;
+    #effectCleanups: (() => void)[] = [];
 
     #isVertical = computed(() => {
         const direction = this.#direction.value;
@@ -72,19 +72,25 @@ export class GestureManager {
         };
     });
 
-    #timeDelta = computed(() => this.#currentTime.value - this.#lastTime.value);
+    #timeDelta = computed(() => {
+        const dragStartTime = this.#dragStartTime.value;
+        const releaseTime = this.#releaseTime.value;
+        if (dragStartTime === 0 || releaseTime === 0) return 0;
+        return releaseTime - dragStartTime;
+    });
 
     #velocity = computed(() => {
         const timeDelta = this.#timeDelta.value;
         if (timeDelta <= 0) return 0;
 
+        const pointerStart = this.#pointerStart.value;
         const current = this.#currentPointer.value;
-        const last = this.#lastPointer.value;
+        if (!pointerStart) return 0;
+
         const isVertical = this.#isVertical.value;
+        const totalDistance = isVertical ? Math.abs(current.y - pointerStart.y) : Math.abs(current.x - pointerStart.x);
 
-        const distanceFromLast = isVertical ? Math.abs(current.y - last.y) : Math.abs(current.x - last.x);
-
-        return distanceFromLast / timeDelta;
+        return totalDistance / timeDelta;
     });
 
     #distance = computed(() => {
@@ -186,11 +192,9 @@ export class GestureManager {
 
         const now = Date.now();
         this.#pointerStart.value = { x: event.pageX, y: event.pageY };
-
         this.#currentPointer.value = { x: event.pageX, y: event.pageY };
         this.#lastPointer.value = { x: event.pageX, y: event.pageY };
-        this.#currentTime.value = now;
-        this.#lastTime.value = now;
+        this.#dragStartTime.value = now;
 
         this.#gesture.value = "dragging";
         this.#callbacks.onDragStart();
@@ -203,9 +207,7 @@ export class GestureManager {
         if (!this.#pointerStart.value) return;
 
         this.#lastPointer.value = this.#currentPointer.value;
-        this.#lastTime.value = this.#currentTime.value;
         this.#currentPointer.value = { x: event.pageX, y: event.pageY };
-        this.#currentTime.value = Date.now();
     }
 
     handlePointerUp(_event: PointerEvent): void {
@@ -213,17 +215,18 @@ export class GestureManager {
             `🔥 DRAG END - Distance: ${this.#distance.value.toFixed(2)} Dismiss: ${this.#shouldDismiss.value}`
         );
 
+        this.#releaseTime.value = Date.now();
         const shouldDismiss = this.#shouldDismiss.value;
+        console.log("shouldDismiss", shouldDismiss, shouldDismiss ? null : "translate3d(0, 0, 0)");
         this.#callbacks.onDragEnd(shouldDismiss, shouldDismiss ? null : "translate3d(0, 0, 0)");
 
+        // Reset state
         this.#gesture.value = "idle";
         this.#pointerStart.value = null;
-
-        const now = Date.now();
         this.#currentPointer.value = { x: 0, y: 0 };
         this.#lastPointer.value = { x: 0, y: 0 };
-        this.#currentTime.value = now;
-        this.#lastTime.value = now;
+        this.#dragStartTime.value = 0;
+        this.#releaseTime.value = 0;
     }
 
     get gesture(): GestureState {

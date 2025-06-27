@@ -4,11 +4,6 @@ import { createDrawer } from "./utils";
 type ColorBlock = "red" | "blue";
 type ScrollDirection = "up" | "down";
 
-interface ScrollPosition {
-    x: number;
-    y: number;
-}
-
 interface FocusState {
     activeElementId: string | null;
     activeElementTag: string | null;
@@ -30,7 +25,7 @@ const backgroundLockTemplate = `
     <vaul-drawer-trigger style="position: fixed; top: 20px; left: 20px; z-index: 100; padding: 10px; background: white; border: 2px solid black;">
       Open Drawer
     </vaul-drawer-trigger>
-    <vaul-drawer-content>
+    <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
       <div style="padding: 20px; background: white;">
         <h2>Drawer Content</h2>
         <button id="drawer-btn1" style="padding: 10px; margin: 5px; border: 2px solid gray;" onfocus="this.style.border='3px solid red'" onblur="this.style.border='2px solid gray'">Drawer Button 1</button>
