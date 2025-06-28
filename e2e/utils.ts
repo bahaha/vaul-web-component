@@ -1,11 +1,10 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-type BaseCreateDrawerOptions = { page: Page };
+type BaseCreateDrawerOptions = { page: Page; animationDuration?: number };
 
 type SimpleDrawer = BaseCreateDrawerOptions & {
     direction?: "top" | "bottom" | "left" | "right" | (string & {});
     dismissible?: boolean;
-    animationDuration?: number;
 };
 
 type FlexibleDrawer = BaseCreateDrawerOptions & {
@@ -34,7 +33,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
     const dialog = page.locator(dialogSelector);
 
     const waitDialogAnimation = async () => {
-        await waitForAnimation(dialog, isFlexibleDrawer(options) ? undefined : options.animationDuration ?? 100);
+        await waitForAnimation(dialog, options.animationDuration ?? 100);
         // add short delay to ensure browser sync the dialog attributes
         await page.waitForTimeout(50);
     };
@@ -50,6 +49,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
                     name: styles.animationName,
                     duration: styles.animationDuration,
                 },
+                transform: el.style.transform,
                 margin: {
                     left: styles.marginLeft,
                     right: styles.marginRight,
@@ -83,6 +83,24 @@ export async function createDrawer(options: CreateDrawerOptions) {
         }
     };
 
+    const performDrag = async (options: { delta: [number, number]; duration?: number }) => {
+        const dialogBox = await dialog.boundingBox();
+        if (!dialogBox) return;
+
+        const { x, y, width, height } = dialogBox;
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+        const { delta, duration = 300 } = options;
+        const [deltaX, deltaY] = delta;
+
+        await page.mouse.move(centerX, centerY);
+        await page.mouse.down();
+        await page.mouse.move(centerX + deltaX, centerY + deltaY);
+        await page.waitForTimeout(duration);
+        await page.mouse.up();
+        await waitDialogAnimation();
+    };
+
     return {
         elements: {
             trigger,
@@ -95,6 +113,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
         openDrawer,
         clickOnBackdrop,
         waitDialogAnimation,
+        performDrag,
     };
 }
 

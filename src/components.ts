@@ -4,28 +4,33 @@ import contentStyles from "./styles/vaul-drawer-content.css?raw";
 import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
 import { signal, effect, computed } from "@preact/signals";
-import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
+import { createParsersFromConfig, attr } from "./utils/parser";
 import { ScrollManager } from "./utils/scroll-manager";
-const camelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-
-const supportedDirections = ["top", "bottom", "left", "right"] as const;
-export type Direction = (typeof supportedDirections)[number];
+import { GestureManager } from "./utils/gesture-manager";
+import { type Direction, supportedDirections } from "./types";
 
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
     #direction = signal<Direction>("bottom");
     #open = signal<boolean>(false);
     #dismissible = signal<boolean>(true);
+    #velocityThreshold = signal<number>(0.4);
+    #closeThreshold = signal<number>(0.25);
 
     #isVertical = computed(() => {
         const direction = this.#direction.value;
         return direction === "top" || direction === "bottom";
     });
+    #propsSubscriptions: Map<number, () => void> = new Map();
 
-    private static parsers = createAttributeParsers({
-        direction: createEnumParser({ name: "direction", validValues: supportedDirections, defaultValue: "bottom" }),
-        dismissible: createBooleanParser(true),
-    });
+    private static attributeConfigs = [
+        attr.enum("direction", supportedDirections, "bottom"),
+        attr.boolean("dismissible", true),
+        attr.number("velocity-threshold", 0.4, { min: 0 }),
+        attr.number("close-threshold", 0.25, { min: 0, max: 1 }),
+    ] as const;
+
+    private static parsers = createParsersFromConfig(VaulDrawer.attributeConfigs);
 
     constructor() {
         super();
@@ -33,9 +38,14 @@ export class VaulDrawer extends HTMLElement {
 
     connectedCallback() {
         this.#render();
-        for (const [attr, parser] of Object.entries(VaulDrawer.parsers)) {
-            (this as any)[attr] = parser(this.getAttribute(attr));
+        // Initialize all attributes using the enhanced parser system
+        for (const attributeName of VaulDrawer.parsers.getObservedAttributes()) {
+            VaulDrawer.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
         }
+    }
+
+    disconnectedCallback() {
+        this.#propsSubscriptions.forEach(cleanup => cleanup());
     }
 
     static get observedAttributes() {
@@ -44,10 +54,23 @@ export class VaulDrawer extends HTMLElement {
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (oldValue === newValue) return;
-        const parser = VaulDrawer.parsers[name as keyof typeof VaulDrawer.parsers];
-        if (parser && typeof parser === "function") {
-            (this as any)[name] = parser(newValue);
+        // Use enhanced parser system - automatically handles camelCase conversion
+        VaulDrawer.parsers.updateProperty(this, name, newValue);
+    }
+
+    watch(
+        prop: "direction" | "dismissible" | "velocityThreshold" | "closeThreshold",
+        callback: (newValue: any) => void
+    ): () => void {
+        let key = Math.floor(Math.random() * 1000000);
+        while (this.#propsSubscriptions.has(key)) {
+            key = Math.floor(Math.random() * 1000000);
         }
+        this.#propsSubscriptions.set(
+            key,
+            effect(() => callback(this[prop]))
+        );
+        return () => this.#propsSubscriptions.delete(key);
     }
 
     #render() {
@@ -93,6 +116,22 @@ export class VaulDrawer extends HTMLElement {
             // Change open to false wiill make data-state="closed", which will trigger the exit animation
             // We need to wait for the animation to finish to close the dialog, and then unlock the background interaction
         }
+    }
+
+    get velocityThreshold() {
+        return this.#velocityThreshold.value;
+    }
+
+    set velocityThreshold(value: number) {
+        this.#velocityThreshold.value = value;
+    }
+
+    get closeThreshold() {
+        return this.#closeThreshold.value;
+    }
+
+    set closeThreshold(value: number) {
+        this.#closeThreshold.value = value;
     }
 
     get dialogRef() {
@@ -151,6 +190,7 @@ export class VaulDrawerContent extends HTMLElement {
     #builtInHandle?: HTMLElement;
     #effectCleanups: (() => void)[] = [];
     #scrollManager!: ScrollManager;
+    #gestureManager!: GestureManager;
 
     #showDrawerHandle = computed(() => {
         if (!this.#drawer) return false;
@@ -162,9 +202,9 @@ export class VaulDrawerContent extends HTMLElement {
         return isVertical && showHandle && !hasManualHandle;
     });
 
-    private static parsers = createAttributeParsers({
-        "show-handle": createBooleanParser(true),
-    });
+    private static attributeConfigs = [attr.boolean("show-handle", true)] as const;
+
+    private static parsers = createParsersFromConfig(VaulDrawerContent.attributeConfigs);
 
     // === Web Component Lifecycle ===
     constructor() {
@@ -177,16 +217,14 @@ export class VaulDrawerContent extends HTMLElement {
         this.#bindDrawerAttributes();
         this.#setupAnimationListeners();
 
-        for (const [attr, parser] of Object.entries(VaulDrawerContent.parsers)) {
-            (this as any)[camelCase(attr)] = parser(this.getAttribute(attr));
+        for (const attributeName of VaulDrawerContent.parsers.getObservedAttributes()) {
+            VaulDrawerContent.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
         }
 
         if (!this.#drawer) return;
         this.#registerDrawerHandle();
-        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
-        this.#effectCleanups.push(
-            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
-        );
+        this.#setupGestureManager();
+        this.#setupScrollManager();
     }
 
     static get observedAttributes() {
@@ -195,20 +233,10 @@ export class VaulDrawerContent extends HTMLElement {
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (oldValue === newValue) return;
-        const parser = VaulDrawerContent.parsers[name as keyof typeof VaulDrawerContent.parsers];
-        if (parser && typeof parser === "function") {
-            (this as any)[camelCase(name)] = parser(newValue);
-        }
+        VaulDrawerContent.parsers.updateProperty(this, name, newValue);
     }
 
     disconnectedCallback() {
-        this.dialog?.removeEventListener("animationend", this.#closeDialog);
-        this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
-        this.dialog?.removeEventListener("click", this.#handleDialogClick);
-        window.removeEventListener("keydown", this.#handleKeyDown, true);
-
-        this.#scrollManager.destroy();
-
         this.#effectCleanups.forEach(cleanup => cleanup());
         this.#effectCleanups = [];
     }
@@ -235,10 +263,11 @@ export class VaulDrawerContent extends HTMLElement {
 
     #bindDrawerAttributes() {
         if (!this.#drawer) return;
-
-        this.#effectCleanups.push(effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)));
         this.#effectCleanups.push(
-            effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed"))
+            ...[
+                effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)),
+                effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed")),
+            ]
         );
     }
 
@@ -251,6 +280,79 @@ export class VaulDrawerContent extends HTMLElement {
         // - issues.chromium.org/issues/346597066
         // - issues.chromium.org/issues/41491338
         window.addEventListener("keydown", this.#handleKeyDown, true);
+
+        this.#effectCleanups.push(() => {
+            this.dialog?.removeEventListener("animationend", this.#closeDialog);
+            this.dialog?.removeEventListener("cancel", this.#blockNativeDialogCancel, true);
+            this.dialog?.removeEventListener("click", this.#handleDialogClick);
+            window.removeEventListener("keydown", this.#handleKeyDown, true);
+        });
+    }
+
+    #setupScrollManager() {
+        if (!this.#drawer) return;
+        this.#scrollManager = new ScrollManager({ allowScrollWithin: [this.dialog, this] });
+        this.#effectCleanups.push(
+            effect(() => (this.#drawer!.open ? this.#scrollManager.lock() : this.#scrollManager.unlock()))
+        );
+        this.#effectCleanups.push(() => this.#scrollManager.destroy());
+    }
+
+    #setupGestureManager() {
+        if (!this.#drawer) return;
+
+        this.#gestureManager = new GestureManager({
+            direction: this.#drawer.direction,
+            dismissible: this.#drawer?.dismissible ?? true,
+            velocityThreshold: this.#drawer.velocityThreshold,
+            closeThreshold: this.#drawer.closeThreshold,
+            getTargetDimensions: () => {
+                const rect = this.dialog.getBoundingClientRect();
+                return { width: rect.width, height: rect.height };
+            },
+            onDragStart: () => (this.dialog.style.transition = "none"),
+            onDrag: (transform: string) => (this.dialog.style.transform = transform),
+            onDragEnd: (shouldDismiss: boolean, transform: string | null) => {
+                this.dialog.style.transition = "transform var(--vaul-drawer-duration) var(--vaul-drawer-timing)";
+                if (transform) {
+                    this.dialog.style.transform = transform;
+                }
+                if (shouldDismiss) {
+                    this.#drawer!.open = false;
+                }
+            },
+        });
+
+        const propsWatchers = [
+            this.#drawer.watch("direction", direction => (this.#gestureManager.direction = direction)),
+            this.#drawer.watch("dismissible", dismissible => (this.#gestureManager.dismissible = dismissible)),
+            this.#drawer.watch(
+                "velocityThreshold",
+                velocityThreshold => (this.#gestureManager.velocityThreshold = velocityThreshold)
+            ),
+            this.#drawer.watch(
+                "closeThreshold",
+                closeThreshold => (this.#gestureManager.closeThreshold = closeThreshold)
+            ),
+        ];
+
+        this.dialog.addEventListener("pointerdown", this.#handlePointerDown);
+        this.dialog.addEventListener("pointermove", this.#handlePointerMove);
+        this.dialog.addEventListener("pointerup", this.#handlePointerUp);
+        this.dialog.addEventListener("pointerout", this.#handlePointerOut);
+        this.dialog.addEventListener("contextmenu", this.#handleContextMenu);
+
+        this.#effectCleanups.push(() => {
+            propsWatchers.forEach(cleanup => cleanup());
+
+            this.dialog?.removeEventListener("pointerdown", this.#handlePointerDown);
+            this.dialog?.removeEventListener("pointermove", this.#handlePointerMove);
+            this.dialog?.removeEventListener("pointerup", this.#handlePointerUp);
+            this.dialog?.removeEventListener("pointerout", this.#handlePointerOut);
+            this.dialog?.removeEventListener("contextmenu", this.#handleContextMenu);
+
+            this.#gestureManager.destroy();
+        });
     }
 
     // === Event Handlers ===
@@ -259,6 +361,8 @@ export class VaulDrawerContent extends HTMLElement {
 
         if (event.animationName.startsWith("slide-to-")) {
             this.dialog.close();
+            // Reset the drawer position to avoid memoried transform while reopen
+            this.dialog.style.transform = "";
         }
     };
 
@@ -286,6 +390,68 @@ export class VaulDrawerContent extends HTMLElement {
         if (!this.#drawer.dismissible) return;
 
         this.#drawer.open = false;
+    };
+
+    // === Gesture Event Handlers ===
+    #handlePointerDown = (event: PointerEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+
+        logger.debug("VaulDrawerContent: Pointer down", {
+            x: event.pageX,
+            y: event.pageY,
+            pointerId: event.pointerId,
+        });
+
+        this.#gestureManager.handlePointerDown(event);
+    };
+
+    #handlePointerMove = (event: PointerEvent) => {
+        if (!this.#drawer || !this.#drawer.open) return;
+
+        logger.debug("VaulDrawerContent: Pointer move", {
+            x: event.pageX,
+            y: event.pageY,
+            gesture: this.#gestureManager.gesture,
+        });
+
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        this.#gestureManager.handlePointerMove(event);
+    };
+
+    #handlePointerUp = (event: PointerEvent) => {
+        if (!this.#drawer) return;
+
+        logger.debug("VaulDrawerContent: Pointer up", {
+            x: event.pageX,
+            y: event.pageY,
+            pointerId: event.pointerId,
+            target: event.target,
+            currentTarget: event.currentTarget,
+        });
+
+        this.#gestureManager.handlePointerUp(event);
+    };
+
+    #handlePointerOut = (event: PointerEvent) => {
+        if (!this.#drawer) return;
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        this.#gestureManager.handlePointerUp(event);
+    };
+
+    #handleContextMenu = (_event: Event) => {
+        if (!this.#drawer) return;
+        if (this.#gestureManager.gesture !== "dragging") return;
+
+        // Convert to PointerEvent-like object for consistency
+        const syntheticEvent = new PointerEvent("pointerup", {
+            clientX: 0,
+            clientY: 0,
+            pointerId: 1,
+        });
+
+        this.#gestureManager.handlePointerUp(syntheticEvent);
     };
 
     // === Handle Management Methods ===
