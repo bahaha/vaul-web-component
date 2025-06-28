@@ -4,17 +4,18 @@ import contentStyles from "./styles/vaul-drawer-content.css?raw";
 import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
 import { signal, effect, computed } from "@preact/signals";
-import { createAttributeParsers, createBooleanParser, createEnumParser } from "./utils/parser";
+import { createParsersFromConfig, attr } from "./utils/parser";
 import { ScrollManager } from "./utils/scroll-manager";
 import { GestureManager } from "./utils/gesture-manager";
 import { type Direction, supportedDirections } from "./types";
-const camelCase = (str: string) => str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
 export class VaulDrawer extends HTMLElement {
     #dialogRef?: HTMLDialogElement;
     #direction = signal<Direction>("bottom");
     #open = signal<boolean>(false);
     #dismissible = signal<boolean>(true);
+    #velocityThreshold = signal<number>(0.4);
+    #closeThreshold = signal<number>(0.25);
 
     #isVertical = computed(() => {
         const direction = this.#direction.value;
@@ -22,10 +23,14 @@ export class VaulDrawer extends HTMLElement {
     });
     #propsSubscriptions: Map<number, () => void> = new Map();
 
-    private static parsers = createAttributeParsers({
-        direction: createEnumParser({ name: "direction", validValues: supportedDirections, defaultValue: "bottom" }),
-        dismissible: createBooleanParser(true),
-    });
+    private static attributeConfigs = [
+        attr.enum("direction", supportedDirections, "bottom"),
+        attr.boolean("dismissible", true),
+        attr.number("velocity-threshold", 0.4, { min: 0 }),
+        attr.number("close-threshold", 0.25, { min: 0, max: 1 }),
+    ] as const;
+
+    private static parsers = createParsersFromConfig(VaulDrawer.attributeConfigs);
 
     constructor() {
         super();
@@ -33,8 +38,9 @@ export class VaulDrawer extends HTMLElement {
 
     connectedCallback() {
         this.#render();
-        for (const [attr, parser] of Object.entries(VaulDrawer.parsers)) {
-            (this as any)[attr] = parser(this.getAttribute(attr));
+        // Initialize all attributes using the enhanced parser system
+        for (const attributeName of VaulDrawer.parsers.getObservedAttributes()) {
+            VaulDrawer.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
         }
     }
 
@@ -48,14 +54,18 @@ export class VaulDrawer extends HTMLElement {
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (oldValue === newValue) return;
-        const parser = VaulDrawer.parsers[name as keyof typeof VaulDrawer.parsers];
-        if (parser && typeof parser === "function") {
-            (this as any)[name] = parser(newValue);
-        }
+        // Use enhanced parser system - automatically handles camelCase conversion
+        VaulDrawer.parsers.updateProperty(this, name, newValue);
     }
 
-    watch(prop: "direction" | "dismissible", callback: (newValue: any) => void): () => void {
-        const key = Math.floor(Math.random() * 1000000);
+    watch(
+        prop: "direction" | "dismissible" | "velocityThreshold" | "closeThreshold",
+        callback: (newValue: any) => void
+    ): () => void {
+        let key = Math.floor(Math.random() * 1000000);
+        while (this.#propsSubscriptions.has(key)) {
+            key = Math.floor(Math.random() * 1000000);
+        }
         this.#propsSubscriptions.set(
             key,
             effect(() => callback(this[prop]))
@@ -106,6 +116,22 @@ export class VaulDrawer extends HTMLElement {
             // Change open to false wiill make data-state="closed", which will trigger the exit animation
             // We need to wait for the animation to finish to close the dialog, and then unlock the background interaction
         }
+    }
+
+    get velocityThreshold() {
+        return this.#velocityThreshold.value;
+    }
+
+    set velocityThreshold(value: number) {
+        this.#velocityThreshold.value = value;
+    }
+
+    get closeThreshold() {
+        return this.#closeThreshold.value;
+    }
+
+    set closeThreshold(value: number) {
+        this.#closeThreshold.value = value;
     }
 
     get dialogRef() {
@@ -176,9 +202,9 @@ export class VaulDrawerContent extends HTMLElement {
         return isVertical && showHandle && !hasManualHandle;
     });
 
-    private static parsers = createAttributeParsers({
-        "show-handle": createBooleanParser(true),
-    });
+    private static attributeConfigs = [attr.boolean("show-handle", true)] as const;
+
+    private static parsers = createParsersFromConfig(VaulDrawerContent.attributeConfigs);
 
     // === Web Component Lifecycle ===
     constructor() {
@@ -191,8 +217,8 @@ export class VaulDrawerContent extends HTMLElement {
         this.#bindDrawerAttributes();
         this.#setupAnimationListeners();
 
-        for (const [attr, parser] of Object.entries(VaulDrawerContent.parsers)) {
-            (this as any)[camelCase(attr)] = parser(this.getAttribute(attr));
+        for (const attributeName of VaulDrawerContent.parsers.getObservedAttributes()) {
+            VaulDrawerContent.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
         }
 
         if (!this.#drawer) return;
@@ -207,10 +233,7 @@ export class VaulDrawerContent extends HTMLElement {
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (oldValue === newValue) return;
-        const parser = VaulDrawerContent.parsers[name as keyof typeof VaulDrawerContent.parsers];
-        if (parser && typeof parser === "function") {
-            (this as any)[camelCase(name)] = parser(newValue);
-        }
+        VaulDrawerContent.parsers.updateProperty(this, name, newValue);
     }
 
     disconnectedCallback() {
@@ -281,6 +304,8 @@ export class VaulDrawerContent extends HTMLElement {
         this.#gestureManager = new GestureManager({
             direction: this.#drawer.direction,
             dismissible: this.#drawer?.dismissible ?? true,
+            velocityThreshold: this.#drawer.velocityThreshold,
+            closeThreshold: this.#drawer.closeThreshold,
             getTargetDimensions: () => {
                 const rect = this.dialog.getBoundingClientRect();
                 return { width: rect.width, height: rect.height };
@@ -301,6 +326,14 @@ export class VaulDrawerContent extends HTMLElement {
         const propsWatchers = [
             this.#drawer.watch("direction", direction => (this.#gestureManager.direction = direction)),
             this.#drawer.watch("dismissible", dismissible => (this.#gestureManager.dismissible = dismissible)),
+            this.#drawer.watch(
+                "velocityThreshold",
+                velocityThreshold => (this.#gestureManager.velocityThreshold = velocityThreshold)
+            ),
+            this.#drawer.watch(
+                "closeThreshold",
+                closeThreshold => (this.#gestureManager.closeThreshold = closeThreshold)
+            ),
         ];
 
         this.dialog.addEventListener("pointerdown", this.#handlePointerDown);

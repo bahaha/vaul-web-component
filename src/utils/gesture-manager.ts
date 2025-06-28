@@ -148,9 +148,9 @@ export class GestureManager {
         const velocityThreshold = options.velocityThreshold ?? DEFAULT_VELOCITY_THRESHOLD;
         const closeThreshold = options.closeThreshold ?? DEFAULT_CLOSE_THRESHOLD;
 
-        assert(velocityThreshold < 0, "velocityThreshold must be a positive number (px/ms)");
+        assert(velocityThreshold <= 0, "velocityThreshold must be a positive number (px/ms)");
         assert(
-            closeThreshold < 0 || closeThreshold > 1,
+            closeThreshold <= 0 || closeThreshold > 1,
             "closeThreshold is distance threshold as ratio (0-1) for dismissal"
         );
 
@@ -217,7 +217,6 @@ export class GestureManager {
 
         this.#releaseTime.value = Date.now();
         const shouldDismiss = this.#shouldDismiss.value;
-        console.log("shouldDismiss", shouldDismiss, shouldDismiss ? null : "translate3d(0, 0, 0)");
         this.#callbacks.onDragEnd(shouldDismiss, shouldDismiss ? null : "translate3d(0, 0, 0)");
 
         // Reset state
@@ -246,7 +245,7 @@ export class GestureManager {
     }
 
     set velocityThreshold(value: number) {
-        assert(value < 0, "velocityThreshold must be a positive number (px/ms)");
+        assert(value <= 0, "velocityThreshold must be a positive number (px/ms)");
         this.#velocityThreshold.value = value;
     }
 
@@ -255,7 +254,7 @@ export class GestureManager {
     }
 
     set closeThreshold(value: number) {
-        assert(value < 0 || value > 1, "closeThreshold is distance threshold as ratio (0-1) for dismissal");
+        assert(value <= 0 || value > 1, "closeThreshold is distance threshold as ratio (0-1) for dismissal");
         this.#closeThreshold.value = value;
     }
 }

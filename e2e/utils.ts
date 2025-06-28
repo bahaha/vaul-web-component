@@ -83,7 +83,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
         }
     };
 
-    const perfromDrag = async (options: { delta: [number, number]; duration?: number }) => {
+    const performDrag = async (options: { delta: [number, number]; duration?: number }) => {
         const dialogBox = await dialog.boundingBox();
         if (!dialogBox) return;
 
@@ -113,7 +113,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
         openDrawer,
         clickOnBackdrop,
         waitDialogAnimation,
-        perfromDrag,
+        performDrag,
     };
 }
 
