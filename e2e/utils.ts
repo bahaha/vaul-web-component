@@ -83,7 +83,12 @@ export async function createDrawer(options: CreateDrawerOptions) {
         }
     };
 
-    const performDrag = async (options: { delta: [number, number]; duration?: number }) => {
+    const performDrag = async (options: {
+        delta: [number, number];
+        duration?: number;
+        beforeRelease?: () => Promise<void>;
+        beforeDialogAnimation?: () => Promise<void>;
+    }) => {
         const dialogBox = await dialog.boundingBox();
         if (!dialogBox) return;
 
@@ -97,7 +102,9 @@ export async function createDrawer(options: CreateDrawerOptions) {
         await page.mouse.down();
         await page.mouse.move(centerX + deltaX, centerY + deltaY);
         await page.waitForTimeout(duration);
+        await options.beforeRelease?.();
         await page.mouse.up();
+        await options.beforeDialogAnimation?.();
         await waitDialogAnimation();
     };
 

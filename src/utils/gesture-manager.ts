@@ -187,6 +187,10 @@ export class GestureManager {
 
     // Core gesture detection methods
     handlePointerDown(event: PointerEvent): void {
+        // Check for text selection before starting drag
+        const highlightedText = window.getSelection()?.toString();
+        if (highlightedText && highlightedText.length > 0) return;
+
         // Capture pointer for target element to ensure we get move/up events even outside bounds
         (event.target as HTMLElement).setPointerCapture(event.pointerId);
 
@@ -205,6 +209,12 @@ export class GestureManager {
     handlePointerMove(event: PointerEvent): void {
         if (this.#gesture.value !== "dragging") return;
         if (!this.#pointerStart.value) return;
+        const highlightedText = window.getSelection()?.toString();
+        // Ignore drag if text is selected
+        if (highlightedText && highlightedText.length > 0) {
+            console.log("text selected, disable dragging", highlightedText);
+            return;
+        }
 
         this.#lastPointer.value = this.#currentPointer.value;
         this.#currentPointer.value = { x: event.pageX, y: event.pageY };
