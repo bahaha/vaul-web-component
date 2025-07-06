@@ -47,6 +47,12 @@ dialog {
     }
 }
 
+@media (hover: hover) and (pointer: fine) {
+    dialog {
+        user-select: none;
+    }
+}
+
 /* Horizontal drawers (top/bottom) */
 dialog[data-direction="top"],
 dialog[data-direction="bottom"] {
