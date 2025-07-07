@@ -26,9 +26,9 @@ export async function createDrawer(options: CreateDrawerOptions) {
     await page.waitForTimeout(100);
 
     const trigger = page.locator("vaul-drawer-trigger");
-    const content = page.locator("vaul-drawer-content");
-    const handle = content.locator("vaul-drawer-handle");
-    const dialogSelector = "vaul-drawer-content dialog";
+    const portal = page.locator("vaul-drawer-portal");
+    const handle = portal.locator("vaul-drawer-handle");
+    const dialogSelector = "vaul-drawer-portal dialog";
     const direction = (await page.locator("vaul-drawer").getAttribute("direction")) ?? "bottom";
     const dialog = page.locator(dialogSelector);
 
@@ -111,7 +111,8 @@ export async function createDrawer(options: CreateDrawerOptions) {
     return {
         elements: {
             trigger,
-            content,
+            portal,
+            content: page.locator("vaul-drawer-content"),
             handle,
             contentCheckbox: page.getByTestId("drawer__content_checkbox"),
             contentLabel: page.getByTestId("drawer__content_label"),
@@ -132,13 +133,15 @@ function getVaulDrawerTemplate({ direction = "bottom", dismissible = true, anima
     return `
         <vaul-drawer direction="${direction}" dismissible="${dismissible}">
             <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-            <vaul-drawer-content style="--vaul-drawer-duration: ${animationDuration}ms;">
-                <div>Hello Web Component Drawer!</div>
-                <label>
-                    <input name="checkbox" type="checkbox" data-testid="drawer__content_checkbox">
-                    <span data-testid="drawer__content_label">checkbox will be checked if label clicks</span>
-                </label>
-            </vaul-drawer-content>
+            <vaul-drawer-portal style="--vaul-drawer-duration: ${animationDuration}ms;">
+                <vaul-drawer-content>
+                    <div>Hello Web Component Drawer!</div>
+                    <label>
+                        <input name="checkbox" type="checkbox" data-testid="drawer__content_checkbox">
+                        <span data-testid="drawer__content_label">checkbox will be checked if label clicks</span>
+                    </label>
+                </vaul-drawer-content>
+            </vaul-drawer-portal>
         </vaul-drawer>
     `;
 }

@@ -406,9 +406,11 @@ test(
         const customTemplate = `
     <vaul-drawer direction="bottom" velocity-threshold="1">
         <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-        <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
-            <div style="height: 400px; width: 100%; background: #1989;">Custom Velocity Threshold</div>
-        </vaul-drawer-content>
+        <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+            <vaul-drawer-content>
+                <div style="height: 400px; width: 100%; background: #1989;">Custom Velocity Threshold</div>
+            </vaul-drawer-content>
+        </vaul-drawer-portal>
     </vaul-drawer>
     `;
 
@@ -434,9 +436,11 @@ test(
         const customTemplate = `
     <vaul-drawer direction="bottom" close-threshold="0.5">
         <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-        <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
-            <div style="height: 400px; width: 100%; background: #1989;">Custom Close Threshold</div>
-        </vaul-drawer-content>
+        <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+            <vaul-drawer-content>
+                <div style="height: 400px; width: 100%; background: #1989;">Custom Close Threshold</div>
+            </vaul-drawer-content>
+        </vaul-drawer-portal>
     </vaul-drawer>
     `;
 
@@ -462,9 +466,11 @@ test(
         const customTemplate = `
     <vaul-drawer direction="bottom" dismissible="false">
         <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-        <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
-            <div style="height: 400px; width: 100%; background: #1989;">Custom Velocity Threshold</div>
-        </vaul-drawer-content>
+        <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+            <vaul-drawer-content>
+                <div style="height: 400px; width: 100%; background: #1989;">Custom Velocity Threshold</div>
+            </vaul-drawer-content>
+        </vaul-drawer-portal>
     </vaul-drawer>
     `;
 
@@ -518,9 +524,11 @@ function getDragToDismissDrawer(direction: Direction) {
     return `
     <vaul-drawer direction="${direction}">
         <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-        <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
-            <div style="${dimension} background: #1989;" data-testid="hello_world">Hello Web Component Drawer!</div>
-        </vaul-drawer-content>
+        <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+            <vaul-drawer-content>
+                <div style="${dimension} background: #1989;" data-testid="hello_world">Hello Web Component Drawer!</div>
+            </vaul-drawer-content>
+        </vaul-drawer-portal>
     </vaul-drawer>
 `;
 }

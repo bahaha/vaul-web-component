@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { VaulDrawer, VaulDrawerContent, setLogger, noopLogger } from "./index";
+import { VaulDrawer, VaulDrawerPortal, setLogger, noopLogger } from "./index";
 
 setLogger(noopLogger);
 
@@ -20,15 +20,15 @@ describe("drawer-handle", () => {
             it("should auto-initialize handle at top for bottom drawer", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle).toBeTruthy();
@@ -42,15 +42,15 @@ describe("drawer-handle", () => {
             it("should auto-initialize handle at bottom for top drawer", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="top">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle).toBeTruthy();
@@ -64,15 +64,15 @@ describe("drawer-handle", () => {
             it("should NOT auto-initialize handle for left drawer", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="left">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle).toBeFalsy();
@@ -81,15 +81,15 @@ describe("drawer-handle", () => {
             it("should NOT auto-initialize handle for right drawer", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="right">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle).toBeFalsy();
@@ -100,16 +100,16 @@ describe("drawer-handle", () => {
             it("should move handle from top to bottom when changing from bottom to top", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const dialog = content.shadowRoot?.querySelector("dialog")!;
 
                 // Initially bottom drawer - handle at top
@@ -131,16 +131,16 @@ describe("drawer-handle", () => {
             it("should move handle from bottom to top when changing from top to bottom", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="top">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const dialog = content.shadowRoot?.querySelector("dialog")!;
 
                 // Initially top drawer - handle at bottom
@@ -162,16 +162,16 @@ describe("drawer-handle", () => {
             it("should remove handle when changing from vertical to horizontal", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially has handle
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
@@ -189,16 +189,16 @@ describe("drawer-handle", () => {
             it("should add handle when changing from horizontal to vertical", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="left">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially no handle
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
@@ -221,15 +221,15 @@ describe("drawer-handle", () => {
             it('should prevent auto-initialization when show-handle="false" on vertical drawer', async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content show-handle="false">
+                        <vaul-drawer-portal show-handle="false">
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle).toBeFalsy();
@@ -238,15 +238,15 @@ describe("drawer-handle", () => {
             it('should remove existing built-in handle when changed to show-handle="false"', async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially has handle
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
@@ -264,15 +264,15 @@ describe("drawer-handle", () => {
             it('should restore built-in handle when changed back to show-handle="true"', async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content show-handle="false">
+                        <vaul-drawer-portal show-handle="false">
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially no handle
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
@@ -290,15 +290,15 @@ describe("drawer-handle", () => {
             it("should have no effect on horizontal drawers (already no handle)", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="left">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially no handle
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
@@ -324,16 +324,16 @@ describe("drawer-handle", () => {
             it("should prevent built-in handle when custom handle exists", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <vaul-drawer-handle>Custom Handle</vaul-drawer-handle>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const builtInHandle = content.shadowRoot?.querySelector("vaul-drawer-handle");
                 const customHandle = content.querySelector("vaul-drawer-handle");
 
@@ -345,16 +345,16 @@ describe("drawer-handle", () => {
                 // This test validates static detection - dynamic detection would require MutationObserver
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <vaul-drawer-handle>Custom Handle</vaul-drawer-handle>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const builtInHandle = content.shadowRoot?.querySelector("vaul-drawer-handle");
                 const customHandle = content.querySelector("vaul-drawer-handle");
 
@@ -366,17 +366,17 @@ describe("drawer-handle", () => {
             it("should prevent built-in handle with multiple custom handles", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <vaul-drawer-handle>Handle 1</vaul-drawer-handle>
                             <vaul-drawer-handle>Handle 2</vaul-drawer-handle>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const builtInHandle = content.shadowRoot?.querySelector("vaul-drawer-handle");
                 const customHandles = content.querySelectorAll("vaul-drawer-handle");
 
@@ -391,15 +391,15 @@ describe("drawer-handle", () => {
             it("should set data-drawer-direction matching parent drawer", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="top">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
                 const handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
 
                 expect(handle?.getAttribute("data-drawer-direction")).toBe("top");
@@ -408,16 +408,16 @@ describe("drawer-handle", () => {
             it("should update data-drawer-direction when drawer direction changes", async () => {
                 container.innerHTML = `
                     <vaul-drawer direction="bottom">
-                        <vaul-drawer-content>
+                        <vaul-drawer-portal>
                             <div>Content</div>
-                        </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 `;
 
                 await new Promise(resolve => setTimeout(resolve, 0));
 
                 const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-                const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+                const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
 
                 // Initially bottom
                 let handle = content.shadowRoot?.querySelector("vaul-drawer-handle");
