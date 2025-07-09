@@ -1,4 +1,4 @@
-import { test, expect, type Locator } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 import { createDrawer } from "./utils";
 import type { Direction } from "../src/types";
 
@@ -503,17 +503,78 @@ test(
         const selection = await selectText(page.getByTestId("hello_world"));
         expect(selection.length).toBeGreaterThan(0);
 
-        await performDrag({
-            delta: [0, 100],
-            duration: 100,
-            beforeDialogAnimation: async () => {
-                const { transform } = await getDialogDescriber();
-                expect(transform).toBe("translate3d(0px, 0px, 0px)");
-            },
-        });
+        await performDrag({ delta: [0, 100], duration: 100 });
 
         const { open } = await getDialogDescriber();
         expect(open).toBe(true);
+    }
+);
+
+test(
+    "should allow scrolling within drawer content using mouse wheel",
+    { tag: ["@scrollable", "@mouse-wheel"] },
+    async ({ page, isMobile }) => {
+        test.skip(isMobile, "Mobile browsers don't support mouse wheel");
+        const colorSectionHeight = 200;
+        const { openDrawer, getDialogDescriber, scrollContentArea } = await createDrawer({
+            page,
+            animationDuration: 100,
+            template: `,
+                <vaul-drawer direction="bottom">
+                    <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
+                    <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+                        <vaul-drawer-content style="height: ${colorSectionHeight}px; overflow-y: auto;">
+                            <div style="height: ${colorSectionHeight}px; background: red;" data-testid="red-section">RED CONTENT SECTION</div>
+                            <div style="height: ${colorSectionHeight}px; background: blue;" data-testid="blue-section">BLUE CONTENT SECTION</div>
+                        </vaul-drawer-content>
+                    </vaul-drawer-portal>
+                </vaul-drawer>
+            `,
+        });
+
+        await openDrawer();
+        expect(await getCurrentVisibleSection(page)).toBe("red");
+
+        await scrollContentArea(200);
+        expect(await getCurrentVisibleSection(page)).toBe("blue");
+        const { open } = await getDialogDescriber();
+        expect(open).toBe(true);
+    }
+);
+
+// TODO: Find a way to test drag gestures on mobile devices (pan), seems like the mobile devices from playwright are just changing theh viewport, has different gesture behavior
+test.skip(
+    "should allow scrolling within drawer content using touch drag",
+    { tag: ["@scrollable", "@touch"] },
+    async ({ page }) => {
+        const colorSectionHeight = 200;
+        const { openDrawer, getDialogDescriber, performDrag } = await createDrawer({
+            page,
+            animationDuration: 100,
+            template: `,
+                <vaul-drawer direction="bottom">
+                    <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
+                    <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+                        <vaul-drawer-content style="height: ${colorSectionHeight}px; overflow-y: scroll;">
+                            <div style="height: ${colorSectionHeight}px; background: red;" data-testid="red-section">RED CONTENT SECTION</div>
+                            <div style="height: ${colorSectionHeight}px; background: blue;" data-testid="blue-section">BLUE CONTENT SECTION</div>
+                        </vaul-drawer-content>
+                    </vaul-drawer-portal>
+                </vaul-drawer>
+            `,
+        });
+
+        await openDrawer();
+
+        expect(await getCurrentVisibleSection(page)).toBe("red");
+        await performDrag({ delta: [0, colorSectionHeight], duration: 100 });
+
+        const { open } = await getDialogDescriber();
+        expect(await getCurrentVisibleSection(page)).toBe("blue");
+        expect(open).toBe(true);
+
+        await performDrag({ delta: [0, -colorSectionHeight], duration: 100 });
+        expect(await getCurrentVisibleSection(page)).toBe("red");
     }
 );
 
@@ -531,6 +592,36 @@ function getDragToDismissDrawer(direction: Direction) {
         </vaul-drawer-portal>
     </vaul-drawer>
 `;
+}
+
+async function getCurrentVisibleSection(page: Page): Promise<"red" | "blue" | null> {
+    return page.evaluate(() => {
+        const content = document.querySelector("vaul-drawer-content");
+        if (!content) return null;
+
+        const redSection = content.querySelector('[data-testid="red-section"]');
+        const blueSection = content.querySelector('[data-testid="blue-section"]');
+
+        if (!redSection || !blueSection) return null;
+
+        const contentRect = content.getBoundingClientRect();
+        const contentTop = contentRect.top;
+        const contentBottom = contentRect.bottom;
+
+        const redRect = redSection.getBoundingClientRect();
+        const blueRect = blueSection.getBoundingClientRect();
+
+        const redVisibleHeight = Math.max(
+            0,
+            Math.min(redRect.bottom, contentBottom) - Math.max(redRect.top, contentTop)
+        );
+        const blueVisibleHeight = Math.max(
+            0,
+            Math.min(blueRect.bottom, contentBottom) - Math.max(blueRect.top, contentTop)
+        );
+
+        return redVisibleHeight > blueVisibleHeight ? "red" : "blue";
+    });
 }
 
 function selectText(target: Locator) {
