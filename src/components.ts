@@ -307,6 +307,7 @@ export class VaulDrawerPortal extends HTMLElement {
             dismissible: this.#drawer?.dismissible ?? true,
             velocityThreshold: this.#drawer.velocityThreshold,
             closeThreshold: this.#drawer.closeThreshold,
+            boundaryElement: this.dialog,
             getTargetDimensions: () => {
                 const rect = this.dialog.getBoundingClientRect();
                 return { width: rect.width, height: rect.height };
@@ -455,6 +456,10 @@ export class VaulDrawerPortal extends HTMLElement {
         this.#gestureManager.handlePointerUp(syntheticEvent);
     };
 
+    handleTouchMove(event: TouchEvent): void {
+        this.#gestureManager.handleTouchMove(event);
+    }
+
     // === Handle Management Methods ===
     #registerDrawerHandle() {
         this.#effectCleanups.push(
@@ -511,6 +516,7 @@ export class VaulDrawerPortal extends HTMLElement {
 
 export class VaulDrawerContent extends HTMLElement {
     #drawer?: VaulDrawer;
+    #portal?: VaulDrawerPortal;
     #effectCleanups: (() => void)[] = [];
 
     constructor() {
@@ -519,8 +525,9 @@ export class VaulDrawerContent extends HTMLElement {
 
     connectedCallback() {
         this.#render();
-        this.#setupDrawerRef();
+        this.#setupRefs();
         this.#bindDrawerAttributes();
+        this.#setupTouchListeners();
     }
 
     disconnectedCallback() {
@@ -537,11 +544,15 @@ export class VaulDrawerContent extends HTMLElement {
         shadow.appendChild(slot);
     }
 
-    #setupDrawerRef() {
+    #setupRefs() {
         this.#drawer = this.closest("vaul-drawer") as VaulDrawer;
         if (!this.#drawer) {
             logger.warn("VaulDrawerContent: No parent vaul-drawer found");
-            return;
+        }
+
+        this.#portal = this.closest("vaul-drawer-portal") as VaulDrawerPortal;
+        if (!this.#portal) {
+            logger.warn("VaulDrawerContent: No parent vaul-drawer-portal found");
         }
     }
 
@@ -549,6 +560,16 @@ export class VaulDrawerContent extends HTMLElement {
         if (!this.#drawer) return;
         this.#effectCleanups.push(effect(() => this.setAttribute("data-direction", this.#drawer!.direction)));
     }
+
+    #setupTouchListeners() {
+        this.addEventListener("touchmove", this.#handleTouchMove, { passive: false });
+        this.#effectCleanups.push(() => this.removeEventListener("touchmove", this.#handleTouchMove));
+    }
+
+    #handleTouchMove = (event: TouchEvent) => {
+        if (!this.#portal) return;
+        this.#portal.handleTouchMove(event);
+    };
 }
 
 export class VaulDrawerHandle extends HTMLElement {

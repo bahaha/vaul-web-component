@@ -33,6 +33,7 @@ export interface GestureManagerOptions {
     closeThreshold?: number;
     /** Getter function for target dimensions used in drag ratio calculations */
     getTargetDimensions?: () => { width: number; height: number } | null;
+    boundaryElement?: HTMLElement;
     /** Callback when dragging starts */
     onDragStart?: () => void;
     /** Callback during dragging with transform string */
@@ -53,6 +54,7 @@ export class GestureManager {
     #velocityThreshold = signal<number>(DEFAULT_VELOCITY_THRESHOLD);
     #closeThreshold = signal<number>(DEFAULT_CLOSE_THRESHOLD);
     #getTargetDimensions?: () => { width: number; height: number } | null;
+    #boundaryElement?: HTMLElement;
     #callbacks: Required<Pick<GestureManagerOptions, "onDragStart" | "onDrag" | "onDragEnd">>;
     #effectCleanups: (() => void)[] = [];
 
@@ -144,6 +146,18 @@ export class GestureManager {
         return isVertical ? `translate3d(0, ${translateValue}px, 0)` : `translate3d(${translateValue}px, 0, 0)`;
     });
 
+    #shouldPreventTouchScroll = computed(() => {
+        // Only prevent touch scroll when:
+        // 1. We're actively dragging
+        // 2. It's a vertical drawer (horizontal drawers don't conflict with scroll)
+        // 3. We're dragging in the correct dismiss direction (not overdragging)
+        const isDragging = this.#gesture.value === "dragging";
+        const isVertical = this.#isVertical.value;
+        const isOverdragging = this.#isOverdragging.value;
+
+        return isDragging && isVertical && !isOverdragging;
+    });
+
     constructor(options: GestureManagerOptions = {}) {
         const velocityThreshold = options.velocityThreshold ?? DEFAULT_VELOCITY_THRESHOLD;
         const closeThreshold = options.closeThreshold ?? DEFAULT_CLOSE_THRESHOLD;
@@ -159,6 +173,7 @@ export class GestureManager {
         this.#velocityThreshold.value = velocityThreshold;
         this.#closeThreshold.value = closeThreshold;
         this.#getTargetDimensions = options.getTargetDimensions;
+        this.#boundaryElement = options.boundaryElement;
 
         this.#callbacks = {
             onDragStart: options.onDragStart || (() => {}),
@@ -185,7 +200,19 @@ export class GestureManager {
         logger.debug("GestureManager: Destroyed");
     }
 
-    // Core gesture detection methods
+    handleTouchMove(event: TouchEvent): void {
+        const touch = event.touches[0];
+        this.#currentPointer.value = { x: touch.pageX, y: touch.pageY };
+
+        if (this.#shouldPreventTouchScroll.value) {
+            const shouldDrag = this.#shouldDrag(event.target as HTMLElement);
+            if (shouldDrag) {
+                logger.debug("GestureManager: Preventing touchmove scroll during drag");
+                event.preventDefault();
+            }
+        }
+    }
+
     handlePointerDown(event: PointerEvent): void {
         // Check for text selection before starting drag
         const highlightedText = window.getSelection()?.toString();
@@ -203,16 +230,13 @@ export class GestureManager {
         this.#gesture.value = "dragging";
         this.#callbacks.onDragStart();
 
-        logger.debug("🔥 DRAG START");
+        logger.debug("GestureManager: Drag started");
     }
 
     handlePointerMove(event: PointerEvent): void {
         if (this.#gesture.value !== "dragging") return;
         if (!this.#pointerStart.value) return;
-        const highlightedText = window.getSelection()?.toString();
-        // Ignore drag if text is selected
-        if (highlightedText && highlightedText.length > 0) {
-            console.log("text selected, disable dragging", highlightedText);
+        if (!this.#shouldDrag(event.target as HTMLElement)) {
             return;
         }
 
@@ -221,9 +245,10 @@ export class GestureManager {
     }
 
     handlePointerUp(_event: PointerEvent): void {
-        logger.debug(
-            `🔥 DRAG END - Distance: ${this.#distance.value.toFixed(2)} Dismiss: ${this.#shouldDismiss.value}`
-        );
+        logger.debug("GestureManager: Drag ended", {
+            distance: this.#distance.value.toFixed(2),
+            shouldDismiss: this.#shouldDismiss.value,
+        });
 
         this.#releaseTime.value = Date.now();
         const shouldDismiss = this.#shouldDismiss.value;
@@ -236,6 +261,37 @@ export class GestureManager {
         this.#lastPointer.value = { x: 0, y: 0 };
         this.#dragStartTime.value = 0;
         this.#releaseTime.value = 0;
+    }
+
+    #shouldDrag(target: HTMLElement): boolean {
+        // Check for text selection
+        const highlightedText = window.getSelection()?.toString();
+        if (highlightedText && highlightedText.length > 0) {
+            logger.debug("GestureManager: Blocking drag due to text selection");
+            return false;
+        }
+
+        let element = target;
+        while (element && element !== this.#boundaryElement) {
+            if (element.scrollHeight > element.clientHeight) {
+                if (element.scrollTop !== 0) {
+                    logger.debug("GestureManager: Blocking drag - scrollable element not at top", {
+                        tagName: element.tagName,
+                        scrollTop: element.scrollTop,
+                    });
+                    return false;
+                }
+
+                if (element.getAttribute("role") === "dialog") {
+                    logger.debug("GestureManager: Allowing drag on dialog role element");
+                    return true;
+                }
+            }
+
+            element = element.parentNode as HTMLElement;
+        }
+
+        return true;
     }
 
     get gesture(): GestureState {
