@@ -8,10 +8,10 @@ Analysis of how React vaul handles drawer bounce back to snap points when user d
 
 ### File Structure
 
--   `use-snap-points.ts` - Main snap point logic and bounce back strategy
--   `index.tsx` - Drag handling and event coordination
--   `constants.ts` - Animation timing and thresholds
--   `helpers.ts` - Utility functions for transforms and calculations
+- `use-snap-points.ts` - Main snap point logic and bounce back strategy
+- `index.tsx` - Drag handling and event coordination
+- `constants.ts` - Animation timing and thresholds
+- `helpers.ts` - Utility functions for transforms and calculations
 
 ## Bounce Back Decision Algorithm
 
@@ -36,9 +36,9 @@ if (!snapToSequentialPoint && velocity > 2 && hasDraggedUp && snapPointsOffset &
 
 **Strategy**:
 
--   Velocity > 2 units/ms = immediate directional snap
--   Ignores current position, prioritizes user intent
--   Respects `snapToSequentialPoint` flag for controlled behavior
+- Velocity > 2 units/ms = immediate directional snap
+- Ignores current position, prioritizes user intent
+- Respects `snapToSequentialPoint` flag for controlled behavior
 
 ### 2. Medium Velocity + Small Drag (Priority 2)
 
@@ -67,9 +67,9 @@ if (velocity > VELOCITY_THRESHOLD && Math.abs(draggedDistance) < dim * 0.4) {
 
 **Strategy**:
 
--   Velocity > 0.4 AND drag distance < 40% of screen = snap to adjacent point
--   Provides "flick to next" behavior
--   Includes boundary checks to prevent invalid snaps
+- Velocity > 0.4 AND drag distance < 40% of screen = snap to adjacent point
+- Provides "flick to next" behavior
+- Includes boundary checks to prevent invalid snaps
 
 ### 3. Proximity-Based Fallback (Priority 3)
 
@@ -88,9 +88,9 @@ snapToPoint(closestSnapPoint);
 
 **Strategy**:
 
--   Used when velocity is low or drag distance is large
--   Calculates current drawer position after drag
--   Snaps to geometrically closest snap point
+- Used when velocity is low or drag distance is large
+- Calculates current drawer position after drag
+- Snaps to geometrically closest snap point
 
 ## Position Calculation System
 
@@ -105,9 +105,9 @@ const currentPosition =
 
 **Key Points**:
 
--   Accounts for drawer direction (bottom/right vs top/left)
--   Uses active snap point as reference, not absolute position
--   Considers cumulative drag distance from start position
+- Accounts for drawer direction (bottom/right vs top/left)
+- Uses active snap point as reference, not absolute position
+- Considers cumulative drag distance from start position
 
 ### Snap Point Offset Calculation
 
@@ -147,9 +147,9 @@ const snapPointsOffset = React.useMemo(() => {
 
 **Features**:
 
--   Supports both percentage (0.5) and pixel ("300px") snap points
--   Responsive to container/window size changes
--   Direction-aware calculations
+- Supports both percentage (0.5) and pixel ("300px") snap points
+- Responsive to container/window size changes
+- Direction-aware calculations
 
 ## Animation System
 
@@ -177,10 +177,10 @@ set(drawerRef.current, {
 
 **Characteristics**:
 
--   Uses CSS transitions for smooth animation
--   Custom easing curve for natural feel
--   Hardware-accelerated transforms (translate3d)
--   Coordinated overlay opacity changes
+- Uses CSS transitions for smooth animation
+- Custom easing curve for natural feel
+- Hardware-accelerated transforms (translate3d)
+- Coordinated overlay opacity changes
 
 ## Velocity Calculation
 
@@ -196,9 +196,9 @@ const velocity = Math.abs(distMoved) / timeTaken;
 
 **Method**:
 
--   Distance moved (pixels) / time taken (milliseconds)
--   Direction-aware calculation
--   Absolute value for threshold comparisons
+- Distance moved (pixels) / time taken (milliseconds)
+- Direction-aware calculation
+- Absolute value for threshold comparisons
 
 ### Velocity Thresholds
 
@@ -234,58 +234,58 @@ if (isFirst && dragDirection < 0 && dismissible) {
 
 ### State Coordination
 
--   `activeSnapPoint` - Current snap point (string/number)
--   `activeSnapPointIndex` - Array index of current snap point
--   `snapPointsOffset` - Calculated pixel positions
--   `shouldFade` - Overlay opacity behavior
+- `activeSnapPoint` - Current snap point (string/number)
+- `activeSnapPointIndex` - Array index of current snap point
+- `snapPointsOffset` - Calculated pixel positions
+- `shouldFade` - Overlay opacity behavior
 
 ## Key Insights for Web Component Implementation
 
 ### 1. Decision Tree Priority
 
--   High velocity (>2) → Directional override
--   Medium velocity (>0.4) + small drag → Adjacent snap
--   Default → Closest snap point
+- High velocity (>2) → Directional override
+- Medium velocity (>0.4) + small drag → Adjacent snap
+- Default → Closest snap point
 
 ### 2. Essential Calculations
 
--   Current position = activeSnapPointOffset ± draggedDistance
--   Velocity = distance / time
--   Snap point offsets = percentage × container size
+- Current position = activeSnapPointOffset ± draggedDistance
+- Velocity = distance / time
+- Snap point offsets = percentage × container size
 
 ### 3. Animation Coordination
 
--   500ms cubic-bezier transitions
--   Simultaneous transform + opacity changes
--   Hardware acceleration with translate3d
+- 500ms cubic-bezier transitions
+- Simultaneous transform + opacity changes
+- Hardware acceleration with translate3d
 
 ### 4. Boundary Safety
 
--   Always validate snap point indices
--   Handle edge cases (first/last points)
--   Respect dismissible flag
+- Always validate snap point indices
+- Handle edge cases (first/last points)
+- Respect dismissible flag
 
 ### 5. Performance Considerations
 
--   Use useMemo for expensive calculations
--   Cache DOM measurements
--   Minimize reflows during animation
+- Use useMemo for expensive calculations
+- Cache DOM measurements
+- Minimize reflows during animation
 
 ## Configuration Options
 
 ### `snapToSequentialPoint`
 
--   `false` (default): Allows velocity-based snap point skipping
--   `true`: Always moves to adjacent snap points only
+- `false` (default): Allows velocity-based snap point skipping
+- `true`: Always moves to adjacent snap points only
 
 ### `fadeFromIndex`
 
--   Controls which snap point triggers overlay fade
--   Affects visual feedback during transitions
+- Controls which snap point triggers overlay fade
+- Affects visual feedback during transitions
 
 ### `dismissible`
 
--   Controls whether drawer can be closed by dragging
--   Affects first snap point behavior
+- Controls whether drawer can be closed by dragging
+- Affects first snap point behavior
 
 This analysis provides a complete blueprint for implementing equivalent snap point bounce back behavior in the web component version.

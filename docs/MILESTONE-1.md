@@ -17,21 +17,21 @@ Create a simple drawer web component that shows/hides content when a trigger is 
 
 ### VaulDrawer (Container)
 
--   Main container element
--   Manages state and coordinates between trigger and content
--   Handles event delegation
+- Main container element
+- Manages state and coordinates between trigger and content
+- Handles event delegation
 
 ### VaulDrawerTrigger
 
--   Clickable element that triggers drawer open/close
--   Dispatches events to parent drawer
--   Can contain any content (buttons, text, etc.)
+- Clickable element that triggers drawer open/close
+- Dispatches events to parent drawer
+- Can contain any content (buttons, text, etc.)
 
 ### VaulDrawerContent
 
--   Contains the drawer content
--   Handles show/hide visibility
--   Initially hidden, shown when triggered
+- Contains the drawer content
+- Handles show/hide visibility
+- Initially hidden, shown when triggered
 
 ## Achievement Summary
 
@@ -48,17 +48,17 @@ Create a simple drawer web component that shows/hides content when a trigger is 
 
 ### ✅ Test Results
 
--   **Unit Tests (Vitest)**: 9/9 passed
--   **E2E Tests (Playwright)**: 35/35 passed across all browsers (Chrome, Firefox, Safari, Mobile)
--   **Cross-browser Compatibility**: Verified on desktop and mobile browsers
+- **Unit Tests (Vitest)**: 9/9 passed
+- **E2E Tests (Playwright)**: 35/35 passed across all browsers (Chrome, Firefox, Safari, Mobile)
+- **Cross-browser Compatibility**: Verified on desktop and mobile browsers
 
 ### ✅ Technical Implementation
 
--   **Architecture**: Component-based with proper separation of concerns
--   **Communication**: Uses `closest()` pattern for accessing drawer context
--   **Styling**: External CSS with Vite raw imports
--   **Error Handling**: User-friendly error messages for missing components
--   **Debug Logging**: Comprehensive debug logs (auto-disabled in production)
+- **Architecture**: Component-based with proper separation of concerns
+- **Communication**: Uses `closest()` pattern for accessing drawer context
+- **Styling**: External CSS with Vite raw imports
+- **Error Handling**: User-friendly error messages for missing components
+- **Debug Logging**: Comprehensive debug logs (auto-disabled in production)
 
 ## Next Steps
 

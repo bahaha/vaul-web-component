@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Basic Bottom Drawer - Vaul Web Component</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#3b82f6",
+                            secondary: "#1f2937",
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            /* Custom styles for drawer components */
+            vaul-drawer-content {
+                background: white;
+                border-radius: 12px 12px 0 0;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+                min-height: 200px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            vaul-drawer-handle {
+                --vaul-handle-color: #d1d5db;
+                --vaul-handle-width: 40px;
+                --vaul-handle-height: 4px;
+                margin: 12px auto;
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <div class="max-w-md mx-auto">
+                <header class="text-center mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Basic Bottom Drawer</h1>
+                    <p class="text-gray-600">Simple drawer implementation with Vaul Web Component</p>
+                </header>
+
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Open Bottom Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+
+                        <vaul-drawer-content class="p-6">
+                            <vaul-drawer-handle></vaul-drawer-handle>
+                            <div class="space-y-4">
+                                <h2 class="text-xl font-bold text-gray-900">Welcome to the Drawer</h2>
+                                <p class="text-gray-600">
+                                    This is a basic bottom drawer implementation using Vaul Web Component. You can drag
+                                    the handle to dismiss it or click outside to close.
+                                </p>
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 class="font-semibold text-blue-800 mb-2">Features:</h3>
+                                    <ul class="text-sm text-blue-700 space-y-1">
+                                        <li>• Smooth slide-up animation</li>
+                                        <li>• Drag to dismiss functionality</li>
+                                        <li>• Click outside to close</li>
+                                        <li>• Keyboard accessible (ESC key)</li>
+                                        <li>• Focus trap for accessibility</li>
+                                    </ul>
+                                </div>
+                                <div class="flex gap-3 pt-4">
+                                    <button
+                                        onclick="closeDrawer()"
+                                        class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onclick="confirmAction()"
+                                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                                    >
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
+                        </vaul-drawer-content>
+                    </vaul-drawer>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-500">
+                        Built with
+                        <a
+                            href="https://www.npmjs.com/package/vaul-web-component"
+                            class="text-blue-600 hover:text-blue-800 underline"
+                            target="_blank"
+                        >
+                            Vaul Web Component
+                        </a>
+                        and
+                        <a
+                            href="https://tailwindcss.com"
+                            class="text-blue-600 hover:text-blue-800 underline"
+                            target="_blank"
+                        >
+                            Tailwind CSS
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <script type="module">
+            // Import Vaul Web Component from esm.sh
+            import "https://esm.sh/vaul-web-component@0.1.0";
+
+            // Make functions available globally
+            window.closeDrawer = function () {
+                document.querySelector("vaul-drawer").removeAttribute("open");
+            };
+
+            window.confirmAction = function () {
+                alert("Action confirmed! This would typically trigger your application logic.");
+                closeDrawer();
+            };
+
+            // Log events for debugging
+            document.addEventListener("DOMContentLoaded", function () {
+                const drawer = document.querySelector("vaul-drawer");
+
+                drawer.addEventListener("drawer-open", function () {
+                    console.log("Drawer opened");
+                });
+
+                drawer.addEventListener("drawer-close", function () {
+                    console.log("Drawer closed");
+                });
+            });
+        </script>
+    </body>
+</html>
