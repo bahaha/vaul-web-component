@@ -151,12 +151,6 @@ export class GestureManager {
         return isVertical ? `translate3d(0, ${translateValue}px, 0)` : `translate3d(${translateValue}px, 0, 0)`;
     });
 
-    #shouldPreventTouchScroll = computed(() => {
-        if (this.#gesture.value !== "dragging") return false;
-        if (this.#isOverdragging.value) return false;
-        return true;
-    });
-
     constructor(options: GestureManagerOptions = {}) {
         const velocityThreshold = options.velocityThreshold ?? DEFAULT_VELOCITY_THRESHOLD;
         const closeThreshold = options.closeThreshold ?? DEFAULT_CLOSE_THRESHOLD;
