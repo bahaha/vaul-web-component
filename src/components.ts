@@ -1,5 +1,6 @@
 import drawerStyles from "./styles/vaul-drawer.css?raw";
 import triggerStyles from "./styles/vaul-drawer-trigger.css?raw";
+import portalStyles from "./styles/vaul-drawer-portal.css?raw";
 import contentStyles from "./styles/vaul-drawer-content.css?raw";
 import handleStyles from "./styles/vaul-drawer-handle.css?raw";
 import { logger } from "./logger";
@@ -136,10 +137,10 @@ export class VaulDrawer extends HTMLElement {
 
     get dialogRef() {
         if (!this.#dialogRef) {
-            const content = this.querySelector("vaul-drawer-content") as VaulDrawerContent;
+            const content = this.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
             if (!content) {
                 logger.error(
-                    "VaulDrawer: Please ensure you have a <vaul-drawer-content> element inside your <vaul-drawer>"
+                    "VaulDrawer: Please ensure you have a <vaul-drawer-portal> element inside your <vaul-drawer>"
                 );
                 return undefined;
             }
@@ -183,7 +184,7 @@ export class VaulDrawerTrigger extends HTMLElement {
     };
 }
 
-export class VaulDrawerContent extends HTMLElement {
+export class VaulDrawerPortal extends HTMLElement {
     #drawer?: VaulDrawer;
     dialog!: HTMLDialogElement;
     #showHandle = signal<boolean>(true);
@@ -204,7 +205,7 @@ export class VaulDrawerContent extends HTMLElement {
 
     private static attributeConfigs = [attr.boolean("show-handle", true)] as const;
 
-    private static parsers = createParsersFromConfig(VaulDrawerContent.attributeConfigs);
+    private static parsers = createParsersFromConfig(VaulDrawerPortal.attributeConfigs);
 
     // === Web Component Lifecycle ===
     constructor() {
@@ -217,8 +218,8 @@ export class VaulDrawerContent extends HTMLElement {
         this.#bindDrawerAttributes();
         this.#setupAnimationListeners();
 
-        for (const attributeName of VaulDrawerContent.parsers.getObservedAttributes()) {
-            VaulDrawerContent.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
+        for (const attributeName of VaulDrawerPortal.parsers.getObservedAttributes()) {
+            VaulDrawerPortal.parsers.updateProperty(this, attributeName, this.getAttribute(attributeName));
         }
 
         if (!this.#drawer) return;
@@ -228,12 +229,12 @@ export class VaulDrawerContent extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return VaulDrawerContent.parsers.getObservedAttributes();
+        return VaulDrawerPortal.parsers.getObservedAttributes();
     }
 
     attributeChangedCallback(name: string, oldValue: string, newValue: string) {
         if (oldValue === newValue) return;
-        VaulDrawerContent.parsers.updateProperty(this, name, newValue);
+        VaulDrawerPortal.parsers.updateProperty(this, name, newValue);
     }
 
     disconnectedCallback() {
@@ -245,7 +246,7 @@ export class VaulDrawerContent extends HTMLElement {
     #render() {
         const shadow = this.attachShadow({ mode: "open" });
         const style = document.createElement("style");
-        style.textContent = contentStyles;
+        style.textContent = portalStyles;
         this.dialog = document.createElement("dialog");
         const slot = document.createElement("slot");
         shadow.appendChild(style);
@@ -256,7 +257,7 @@ export class VaulDrawerContent extends HTMLElement {
     #setupDrawerRef() {
         this.#drawer = this.closest("vaul-drawer") as VaulDrawer;
         if (!this.#drawer) {
-            logger.warn("VaulDrawerContent: No parent vaul-drawer found");
+            logger.warn("VaulDrawerPortal: No parent vaul-drawer found");
             return;
         }
     }
@@ -306,6 +307,7 @@ export class VaulDrawerContent extends HTMLElement {
             dismissible: this.#drawer?.dismissible ?? true,
             velocityThreshold: this.#drawer.velocityThreshold,
             closeThreshold: this.#drawer.closeThreshold,
+            boundaryElement: this,
             getTargetDimensions: () => {
                 const rect = this.dialog.getBoundingClientRect();
                 return { width: rect.width, height: rect.height };
@@ -396,7 +398,7 @@ export class VaulDrawerContent extends HTMLElement {
     #handlePointerDown = (event: PointerEvent) => {
         if (!this.#drawer || !this.#drawer.open) return;
 
-        logger.debug("VaulDrawerContent: Pointer down", {
+        logger.debug("VaulDrawerPortal: Pointer down", {
             x: event.pageX,
             y: event.pageY,
             pointerId: event.pointerId,
@@ -408,7 +410,7 @@ export class VaulDrawerContent extends HTMLElement {
     #handlePointerMove = (event: PointerEvent) => {
         if (!this.#drawer || !this.#drawer.open) return;
 
-        logger.debug("VaulDrawerContent: Pointer move", {
+        logger.debug("VaulDrawerPortal: Pointer move", {
             x: event.pageX,
             y: event.pageY,
             gesture: this.#gestureManager.gesture,
@@ -422,7 +424,7 @@ export class VaulDrawerContent extends HTMLElement {
     #handlePointerUp = (event: PointerEvent) => {
         if (!this.#drawer) return;
 
-        logger.debug("VaulDrawerContent: Pointer up", {
+        logger.debug("VaulDrawerPortal: Pointer up", {
             x: event.pageX,
             y: event.pageY,
             pointerId: event.pointerId,
@@ -454,6 +456,10 @@ export class VaulDrawerContent extends HTMLElement {
         this.#gestureManager.handlePointerUp(syntheticEvent);
     };
 
+    handleTouchMove(event: TouchEvent): void {
+        this.#gestureManager.handleTouchMove(event);
+    }
+
     // === Handle Management Methods ===
     #registerDrawerHandle() {
         this.#effectCleanups.push(
@@ -462,7 +468,7 @@ export class VaulDrawerContent extends HTMLElement {
                 // need to replace hanlde position when direction changes
                 const direction = this.#drawer!.direction;
 
-                logger.debug(`VaulDrawerContent: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
+                logger.debug(`VaulDrawerPortal: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
 
                 if (shouldShow) {
                     this.#removeBuiltInHandle();
@@ -487,7 +493,7 @@ export class VaulDrawerContent extends HTMLElement {
         }
 
         this.#builtInHandle = handle;
-        logger.debug(`VaulDrawerContent: Built-in handle added for vertical drawer`);
+        logger.debug(`VaulDrawerPortal: Built-in handle added for vertical drawer`);
     }
 
     #removeBuiltInHandle() {
@@ -495,7 +501,7 @@ export class VaulDrawerContent extends HTMLElement {
 
         this.#builtInHandle.parentNode.removeChild(this.#builtInHandle);
         this.#builtInHandle = undefined;
-        logger.debug("VaulDrawerContent: Built-in handle removed");
+        logger.debug("VaulDrawerPortal: Built-in handle removed");
     }
 
     // === Getters & Setters ===
@@ -506,6 +512,64 @@ export class VaulDrawerContent extends HTMLElement {
     set showHandle(value: boolean) {
         this.#showHandle.value = value;
     }
+}
+
+export class VaulDrawerContent extends HTMLElement {
+    #drawer?: VaulDrawer;
+    #portal?: VaulDrawerPortal;
+    #effectCleanups: (() => void)[] = [];
+
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.#render();
+        this.#setupRefs();
+        this.#bindDrawerAttributes();
+        this.#setupTouchListeners();
+    }
+
+    disconnectedCallback() {
+        this.#effectCleanups.forEach(cleanup => cleanup());
+        this.#effectCleanups = [];
+    }
+
+    #render() {
+        const shadow = this.attachShadow({ mode: "open" });
+        const style = document.createElement("style");
+        style.textContent = contentStyles;
+        const slot = document.createElement("slot");
+        shadow.appendChild(style);
+        shadow.appendChild(slot);
+    }
+
+    #setupRefs() {
+        this.#drawer = this.closest("vaul-drawer") as VaulDrawer;
+        if (!this.#drawer) {
+            logger.warn("VaulDrawerContent: No parent vaul-drawer found");
+        }
+
+        this.#portal = this.closest("vaul-drawer-portal") as VaulDrawerPortal;
+        if (!this.#portal) {
+            logger.warn("VaulDrawerContent: No parent vaul-drawer-portal found");
+        }
+    }
+
+    #bindDrawerAttributes() {
+        if (!this.#drawer) return;
+        this.#effectCleanups.push(effect(() => this.setAttribute("data-direction", this.#drawer!.direction)));
+    }
+
+    #setupTouchListeners() {
+        this.addEventListener("touchmove", this.#handleTouchMove, { passive: false });
+        this.#effectCleanups.push(() => this.removeEventListener("touchmove", this.#handleTouchMove));
+    }
+
+    #handleTouchMove = (event: TouchEvent) => {
+        if (!this.#portal) return;
+        this.#portal.handleTouchMove(event);
+    };
 }
 
 export class VaulDrawerHandle extends HTMLElement {
@@ -533,5 +597,6 @@ export class VaulDrawerHandle extends HTMLElement {
 
 customElements.define("vaul-drawer", VaulDrawer);
 customElements.define("vaul-drawer-trigger", VaulDrawerTrigger);
+customElements.define("vaul-drawer-portal", VaulDrawerPortal);
 customElements.define("vaul-drawer-content", VaulDrawerContent);
 customElements.define("vaul-drawer-handle", VaulDrawerHandle);

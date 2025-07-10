@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { VaulDrawer, VaulDrawerContent, VaulDrawerTrigger, setLogger, noopLogger } from "./index";
+import { VaulDrawer, VaulDrawerPortal, VaulDrawerTrigger, setLogger, noopLogger } from "./index";
 import { createAnimationEvent } from "./test-setup";
 
 setLogger(noopLogger);
@@ -19,14 +19,14 @@ describe("animation-state", () => {
     it("should set data-state to open when drawer opens", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         expect(drawer.dialogRef).toBeDefined();
@@ -39,14 +39,14 @@ describe("animation-state", () => {
     it("should set data-state to closed when drawer closes", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         expect(drawer.dialogRef).toBeDefined();
@@ -61,14 +61,14 @@ describe("animation-state", () => {
         container.innerHTML = `
             <vaul-drawer>
                 <vaul-drawer-trigger>Open</vaul-drawer-trigger>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const trigger = container.querySelector("vaul-drawer-trigger") as VaulDrawerTrigger;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         trigger.click();
@@ -80,14 +80,14 @@ describe("animation-state", () => {
     it("should close dialog on animationend for slide-to animations", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         drawer.open = true;
@@ -103,14 +103,14 @@ describe("animation-state", () => {
     it("should not close dialog on animationend for slide-from animations", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         drawer.open = true;
@@ -126,14 +126,14 @@ describe("animation-state", () => {
     it("should set data-state to closed on ESC key press", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         drawer.open = true;
@@ -148,14 +148,14 @@ describe("animation-state", () => {
     it("should handle rapid toggle without state inconsistency", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         // Rapid toggle
@@ -171,14 +171,14 @@ describe("animation-state", () => {
     it("should maintain backdrop animation state sync with dialog", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         drawer.open = true;

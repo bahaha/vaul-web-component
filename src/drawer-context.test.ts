@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { VaulDrawer, VaulDrawerContent, setLogger, noopLogger } from "./index";
+import { VaulDrawer, VaulDrawerPortal, setLogger, noopLogger } from "./index";
 
 setLogger(noopLogger);
 
@@ -15,10 +15,10 @@ describe("drawer-context", () => {
         document.body.removeChild(container);
     });
 
-    it("should find and cache dialog reference from vaul-drawer-content", async () => {
+    it("should find and cache dialog reference from vaul-drawer-portal", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 

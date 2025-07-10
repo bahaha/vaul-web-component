@@ -65,16 +65,18 @@ test('should NOT render handle when show-handle="false"', async ({ page }) => {
     const template = `
             <vaul-drawer direction="bottom">
                 <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-                <vaul-drawer-content show-handle="false">
-                    <div>Content without handle</div>
-                </vaul-drawer-content>
+                <vaul-drawer-portal show-handle="false">
+                    <vaul-drawer-content>
+                        <div>Content without handle</div>
+                    </vaul-drawer-content>
+                </vaul-drawer-portal>
             </vaul-drawer>
         `;
 
     const { openDrawer } = await createDrawer({ page, template });
     await openDrawer();
 
-    const handle = page.locator("vaul-drawer-content vaul-drawer-handle");
+    const handle = page.locator("vaul-drawer-portal vaul-drawer-handle");
     await expect(handle).not.toBeVisible();
 });
 
@@ -82,16 +84,18 @@ test('should render handle when show-handle="true" (explicit)', async ({ page })
     const template = `
             <vaul-drawer direction="bottom">
                 <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-                <vaul-drawer-content show-handle="true">
-                    <div>Content with explicit handle</div>
-                </vaul-drawer-content>
+                <vaul-drawer-portal show-handle="true">
+                    <vaul-drawer-content>
+                        <div>Content with explicit handle</div>
+                    </vaul-drawer-content>
+                </vaul-drawer-portal>
             </vaul-drawer>
         `;
 
     const { openDrawer } = await createDrawer({ page, template });
     await openDrawer();
 
-    const handle = page.locator("vaul-drawer-content vaul-drawer-handle");
+    const handle = page.locator("vaul-drawer-portal vaul-drawer-handle");
     await expect(handle).toBeVisible();
 });
 
@@ -99,12 +103,14 @@ test("should render custom handle instead of built-in handle", async ({ page }) 
     const template = `
             <vaul-drawer direction="bottom">
                 <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-                <vaul-drawer-content>
-                    <vaul-drawer-handle style="background: red; width: 60px; height: 8px;">
-                        Custom Handle
-                    </vaul-drawer-handle>
-                    <div>Content with custom handle</div>
-                </vaul-drawer-content>
+                <vaul-drawer-portal>
+                    <vaul-drawer-content>
+                        <vaul-drawer-handle style="background: red; width: 60px; height: 8px;">
+                            Custom Handle
+                        </vaul-drawer-handle>
+                        <div>Content with custom handle</div>
+                    </vaul-drawer-content>
+                </vaul-drawer-portal>
             </vaul-drawer>
         `;
 
@@ -125,13 +131,15 @@ test("should position custom handle correctly by user placement", async ({ page 
     const template = `
             <vaul-drawer direction="bottom">
                 <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-                <vaul-drawer-content>
-                    <div>Content before handle</div>
-                    <vaul-drawer-handle style="background: blue; margin: 20px auto;">
-                        Middle Handle
-                    </vaul-drawer-handle>
-                    <div>Content after handle</div>
-                </vaul-drawer-content>
+                <vaul-drawer-portal>
+                    <vaul-drawer-content>
+                        <div>Content before handle</div>
+                        <vaul-drawer-handle style="background: blue; margin: 20px auto;">
+                            Middle Handle
+                        </vaul-drawer-handle>
+                        <div>Content after handle</div>
+                    </vaul-drawer-content>
+                </vaul-drawer-portal>
             </vaul-drawer>
         `;
 

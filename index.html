@@ -117,8 +117,8 @@
                             <vaul-drawer-trigger class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">
                                 Open Drawer
                             </vaul-drawer-trigger>
-                            <vaul-drawer-content>
-                                <div class="p-6 pt-2">
+                            <vaul-drawer-portal>
+                                <vaul-drawer-content class="p-6 pt-2 max-h-96">
                                     <h4 class="text-lg font-bold mb-3">Simple Drawer</h4>
                                     <p class="text-gray-600 mb-4">
                                         Direction: <span id="default-direction-display">bottom</span>
@@ -181,8 +181,8 @@
                                             <p>Line 10: End of scrollable test content.</p>
                                         </div>
                                     </div>
-                                </div>
-                            </vaul-drawer-content>
+                                </vaul-drawer-content>
+                            </vaul-drawer-portal>
                         </vaul-drawer>
                     </div>
 
@@ -197,7 +197,7 @@
                                     class="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                 ></div>
                             </vaul-drawer-trigger>
-                            <vaul-drawer-content class="relative overflow-hidden">
+                            <vaul-drawer-portal class="relative overflow-hidden">
                                 <!-- Animated background -->
                                 <div
                                     class="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900"
@@ -297,7 +297,7 @@
                                         </p>
                                     </div>
                                 </div>
-                            </vaul-drawer-content>
+                            </vaul-drawer-portal>
                         </vaul-drawer>
                     </div>
                 </div>
@@ -345,7 +345,7 @@
                             >
                                 🎨 Custom Handle Demo
                             </vaul-drawer-trigger>
-                            <vaul-drawer-content show-handle="false">
+                            <vaul-drawer-portal show-handle="false">
                                 <!-- Custom handle with Tailwind styling -->
                                 <vaul-drawer-handle
                                     class="my-6 mx-auto w-20 h-2 bg-rose-500 rounded-lg shadow-lg hover:bg-rose-600 hover:shadow-xl transition-all duration-200"
@@ -377,7 +377,7 @@
                                         </ul>
                                     </div>
                                 </div>
-                            </vaul-drawer-content>
+                            </vaul-drawer-portal>
                         </vaul-drawer>
                     </div>
                 </div>
@@ -538,7 +538,7 @@
                                     // Enable built-in handles for vertical drawers
                                     allDrawers.forEach(drawer => {
                                         if (drawer) {
-                                            const content = drawer.querySelector("vaul-drawer-content");
+                                            const content = drawer.querySelector("vaul-drawer-portal");
                                             if (content) content.removeAttribute("show-handle");
                                         }
                                     });
@@ -548,7 +548,7 @@
                                     // Disable all handles
                                     allDrawers.forEach(drawer => {
                                         if (drawer) {
-                                            const content = drawer.querySelector("vaul-drawer-content");
+                                            const content = drawer.querySelector("vaul-drawer-portal");
                                             if (content) content.setAttribute("show-handle", "false");
                                         }
                                     });

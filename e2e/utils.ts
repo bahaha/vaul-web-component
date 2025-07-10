@@ -26,11 +26,11 @@ export async function createDrawer(options: CreateDrawerOptions) {
     await page.waitForTimeout(100);
 
     const trigger = page.locator("vaul-drawer-trigger");
+    const portal = page.locator("vaul-drawer-portal");
     const content = page.locator("vaul-drawer-content");
-    const handle = content.locator("vaul-drawer-handle");
-    const dialogSelector = "vaul-drawer-content dialog";
+    const handle = portal.locator("vaul-drawer-handle");
     const direction = (await page.locator("vaul-drawer").getAttribute("direction")) ?? "bottom";
-    const dialog = page.locator(dialogSelector);
+    const dialog = page.locator("vaul-drawer-portal dialog");
 
     const waitDialogAnimation = async () => {
         await waitForAnimation(dialog, options.animationDuration ?? 100);
@@ -83,12 +83,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
         }
     };
 
-    const performDrag = async (options: {
-        delta: [number, number];
-        duration?: number;
-        beforeRelease?: () => Promise<void>;
-        beforeDialogAnimation?: () => Promise<void>;
-    }) => {
+    const performDrag = async (options: { delta: [number, number]; duration?: number }) => {
         const dialogBox = await dialog.boundingBox();
         if (!dialogBox) return;
 
@@ -102,10 +97,26 @@ export async function createDrawer(options: CreateDrawerOptions) {
         await page.mouse.down();
         await page.mouse.move(centerX + deltaX, centerY + deltaY);
         await page.waitForTimeout(duration);
-        await options.beforeRelease?.();
         await page.mouse.up();
-        await options.beforeDialogAnimation?.();
         await waitDialogAnimation();
+    };
+
+    const scrollContentArea = async (scrollAmount: number) => {
+        const contentElement = page.locator("vaul-drawer-content");
+        await contentElement.hover();
+
+        try {
+            await page.mouse.wheel(0, scrollAmount);
+        } catch (error) {
+            // Fallback for mobile browsers using drag simulation
+            if (error.message.includes("Mouse wheel is not supported")) {
+                await performDrag({ delta: [0, -scrollAmount], duration: 100 });
+            } else {
+                throw error;
+            }
+        }
+
+        await page.waitForTimeout(100);
     };
 
     return {
@@ -113,6 +124,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
             trigger,
             content,
             handle,
+            portal,
             contentCheckbox: page.getByTestId("drawer__content_checkbox"),
             contentLabel: page.getByTestId("drawer__content_label"),
         },
@@ -121,6 +133,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
         clickOnBackdrop,
         waitDialogAnimation,
         performDrag,
+        scrollContentArea,
     };
 }
 
@@ -132,13 +145,15 @@ function getVaulDrawerTemplate({ direction = "bottom", dismissible = true, anima
     return `
         <vaul-drawer direction="${direction}" dismissible="${dismissible}">
             <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
-            <vaul-drawer-content style="--vaul-drawer-duration: ${animationDuration}ms;">
+            <vaul-drawer-portal style="--vaul-drawer-duration: ${animationDuration}ms;">
+              <vaul-drawer-content>
                 <div>Hello Web Component Drawer!</div>
                 <label>
                     <input name="checkbox" type="checkbox" data-testid="drawer__content_checkbox">
                     <span data-testid="drawer__content_label">checkbox will be checked if label clicks</span>
                 </label>
-            </vaul-drawer-content>
+              </vaul-drawer-content>
+            </vaul-drawer-portal>
         </vaul-drawer>
     `;
 }

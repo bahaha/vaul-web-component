@@ -25,8 +25,8 @@ const backgroundLockTemplate = `
     <vaul-drawer-trigger style="position: fixed; top: 20px; left: 20px; z-index: 100; padding: 10px; background: white; border: 2px solid black;">
       Open Drawer
     </vaul-drawer-trigger>
-    <vaul-drawer-content style="--vaul-drawer-duration: 100ms;">
-      <div style="padding: 20px; background: white;">
+    <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
+      <vaul-drawer-content style="padding: 20px; background: white;">
         <h2>Drawer Content</h2>
         <button id="drawer-btn1" style="padding: 10px; margin: 5px; border: 2px solid gray;" onfocus="this.style.border='3px solid red'" onblur="this.style.border='2px solid gray'">Drawer Button 1</button>
         <button id="drawer-btn2" style="padding: 10px; margin: 5px; border: 2px solid gray;" onfocus="this.style.border='3px solid red'" onblur="this.style.border='2px solid gray'">Drawer Button 2</button>
@@ -52,8 +52,8 @@ const backgroundLockTemplate = `
             <p>End of scrollable content</p>
           </div>
         </div>
-      </div>
-    </vaul-drawer-content>
+      </vaul-drawer-content>
+    </vaul-drawer-portal>
   </vaul-drawer>
 `;
 

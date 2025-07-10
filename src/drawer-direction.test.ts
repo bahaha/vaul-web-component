@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { VaulDrawer, VaulDrawerContent, setLogger, noopLogger } from "./index";
+import { VaulDrawer, VaulDrawerPortal, setLogger, noopLogger } from "./index";
 
 setLogger(noopLogger);
 
@@ -22,16 +22,16 @@ describe("drawer-direction", () => {
         expect(drawer.direction).toBe("bottom");
     });
 
-    it("should add data-direction data attribute in vaul-drawer-content", async () => {
+    it("should add data-direction data attribute in vaul-drawer-portal", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
         expect(dialog.dataset.direction).toBe("bottom");
     });
@@ -65,14 +65,14 @@ describe("drawer-direction", () => {
     it("should update data-direction data attributes across direction attribute changes", async () => {
         container.innerHTML = `
             <vaul-drawer>
-                <vaul-drawer-content></vaul-drawer-content>
+                <vaul-drawer-portal></vaul-drawer-portal>
             </vaul-drawer>
         `;
 
         await new Promise(resolve => setTimeout(resolve, 0));
 
         const drawer = container.querySelector("vaul-drawer") as VaulDrawer;
-        const content = container.querySelector("vaul-drawer-content") as VaulDrawerContent;
+        const content = container.querySelector("vaul-drawer-portal") as VaulDrawerPortal;
         const dialog = content.dialog;
 
         const directions = ["top", "left", "right", "bottom"];
