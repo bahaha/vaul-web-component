@@ -307,7 +307,7 @@ export class VaulDrawerPortal extends HTMLElement {
             dismissible: this.#drawer?.dismissible ?? true,
             velocityThreshold: this.#drawer.velocityThreshold,
             closeThreshold: this.#drawer.closeThreshold,
-            boundaryElement: this.dialog,
+            boundaryElement: this,
             getTargetDimensions: () => {
                 const rect = this.dialog.getBoundingClientRect();
                 return { width: rect.width, height: rect.height };

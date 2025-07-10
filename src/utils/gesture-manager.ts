@@ -31,6 +31,8 @@ export interface GestureManagerOptions {
     velocityThreshold?: number;
     /** Distance threshold as ratio (0-1) for dismissal */
     closeThreshold?: number;
+    /** Tolerance in pixels for scroll edge detection (default: 1) */
+    scrollTolerance?: number;
     /** Getter function for target dimensions used in drag ratio calculations */
     getTargetDimensions?: () => { width: number; height: number } | null;
     boundaryElement?: HTMLElement;
@@ -55,6 +57,7 @@ export class GestureManager {
     #closeThreshold = signal<number>(DEFAULT_CLOSE_THRESHOLD);
     #getTargetDimensions?: () => { width: number; height: number } | null;
     #boundaryElement?: HTMLElement;
+    #scrollTolerance: number;
     #callbacks: Required<Pick<GestureManagerOptions, "onDragStart" | "onDrag" | "onDragEnd">>;
     #effectCleanups: (() => void)[] = [];
 
@@ -116,16 +119,18 @@ export class GestureManager {
         return this.#dismissible.value && (isQuickSwipe || isLongDraggedDistance);
     });
 
+    #checkOverdragging(deltaX: number, deltaY: number, direction: Direction): boolean {
+        if (direction === "bottom") return deltaY < 0; // Dragging up = overdrag
+        if (direction === "top") return deltaY > 0; // Dragging down = overdrag
+        if (direction === "right") return deltaX < 0; // Dragging left = overdrag
+        if (direction === "left") return deltaX > 0; // Dragging right = overdrag
+        return false;
+    }
+
     #isOverdragging = computed(() => {
         const position = this.#position.value;
         const direction = this.#direction.value;
-
-        if (direction === "bottom") return position.y < 0; // Dragging up = overdrag
-        if (direction === "top") return position.y > 0; // Dragging down = overdrag
-        if (direction === "right") return position.x < 0; // Dragging left = overdrag
-        if (direction === "left") return position.x > 0; // Dragging right = overdrag
-
-        return false;
+        return this.#checkOverdragging(position.x, position.y, direction);
     });
 
     #transform = computed(() => {
@@ -147,15 +152,9 @@ export class GestureManager {
     });
 
     #shouldPreventTouchScroll = computed(() => {
-        // Only prevent touch scroll when:
-        // 1. We're actively dragging
-        // 2. It's a vertical drawer (horizontal drawers don't conflict with scroll)
-        // 3. We're dragging in the correct dismiss direction (not overdragging)
-        const isDragging = this.#gesture.value === "dragging";
-        const isVertical = this.#isVertical.value;
-        const isOverdragging = this.#isOverdragging.value;
-
-        return isDragging && isVertical && !isOverdragging;
+        if (this.#gesture.value !== "dragging") return false;
+        if (this.#isOverdragging.value) return false;
+        return true;
     });
 
     constructor(options: GestureManagerOptions = {}) {
@@ -174,6 +173,7 @@ export class GestureManager {
         this.#closeThreshold.value = closeThreshold;
         this.#getTargetDimensions = options.getTargetDimensions;
         this.#boundaryElement = options.boundaryElement;
+        this.#scrollTolerance = options.scrollTolerance ?? 1;
 
         this.#callbacks = {
             onDragStart: options.onDragStart || (() => {}),
@@ -201,15 +201,19 @@ export class GestureManager {
     }
 
     handleTouchMove(event: TouchEvent): void {
-        const touch = event.touches[0];
-        this.#currentPointer.value = { x: touch.pageX, y: touch.pageY };
+        if (this.#gesture.value !== "dragging") return;
+        const pointerStart = this.#pointerStart.value;
+        if (!pointerStart) return;
+        if (!this.#shouldDrag(event.target)) return;
 
-        if (this.#shouldPreventTouchScroll.value) {
-            const shouldDrag = this.#shouldDrag(event.target as HTMLElement);
-            if (shouldDrag) {
-                logger.debug("GestureManager: Preventing touchmove scroll during drag");
-                event.preventDefault();
-            }
+        const touch = event.touches[0];
+        const direction = this.#direction.value;
+        const deltaX = touch.pageX - pointerStart.x;
+        const deltaY = touch.pageY - pointerStart.y;
+
+        const isOverdragging = this.#checkOverdragging(deltaX, deltaY, direction);
+        if (!isOverdragging) {
+            event.preventDefault();
         }
     }
 
@@ -236,9 +240,7 @@ export class GestureManager {
     handlePointerMove(event: PointerEvent): void {
         if (this.#gesture.value !== "dragging") return;
         if (!this.#pointerStart.value) return;
-        if (!this.#shouldDrag(event.target as HTMLElement)) {
-            return;
-        }
+        if (!this.#shouldDrag(event.target)) return;
 
         this.#lastPointer.value = this.#currentPointer.value;
         this.#currentPointer.value = { x: event.pageX, y: event.pageY };
@@ -263,7 +265,7 @@ export class GestureManager {
         this.#releaseTime.value = 0;
     }
 
-    #shouldDrag(target: HTMLElement): boolean {
+    #shouldDrag(target: EventTarget | null): boolean {
         // Check for text selection
         const highlightedText = window.getSelection()?.toString();
         if (highlightedText && highlightedText.length > 0) {
@@ -271,20 +273,38 @@ export class GestureManager {
             return false;
         }
 
-        let element = target;
+        let element = target as HTMLElement;
+        const direction = this.#direction.value;
+
         while (element && element !== this.#boundaryElement) {
-            if (element.scrollHeight > element.clientHeight) {
-                if (element.scrollTop !== 0) {
-                    logger.debug("GestureManager: Blocking drag - scrollable element not at top", {
+            const isVertical = this.#isVertical.value;
+            if (isVertical && element.scrollHeight > element.clientHeight) {
+                const scrollRemaining =
+                    direction === "bottom"
+                        ? element.scrollTop
+                        : element.scrollHeight - element.scrollTop - element.clientHeight;
+
+                if (scrollRemaining > this.#scrollTolerance) {
+                    logger.debug("GestureManager: Blocking drag - vertical scroll not at edge", {
                         tagName: element.tagName,
-                        scrollTop: element.scrollTop,
+                        scrollRemaining,
                     });
                     return false;
                 }
+            }
 
-                if (element.getAttribute("role") === "dialog") {
-                    logger.debug("GestureManager: Allowing drag on dialog role element");
-                    return true;
+            if (!isVertical && element.scrollWidth > element.clientWidth) {
+                const scrollRemaining =
+                    direction === "right"
+                        ? element.scrollLeft
+                        : element.scrollWidth - element.scrollLeft - element.clientWidth;
+
+                if (scrollRemaining > this.#scrollTolerance) {
+                    logger.debug("GestureManager: Blocking drag - horizontal scroll not at edge", {
+                        tagName: element.tagName,
+                        scrollRemaining,
+                    });
+                    return false;
                 }
             }
 
