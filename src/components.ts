@@ -188,23 +188,12 @@ export class VaulDrawerPortal extends HTMLElement {
     #drawer?: VaulDrawer;
     dialog!: HTMLDialogElement;
     #showHandle = signal<boolean>(true);
-    #builtInHandle?: HTMLElement;
+    #builtInHandle!: HTMLElement;
     #effectCleanups: (() => void)[] = [];
     #scrollManager!: ScrollManager;
     #gestureManager!: GestureManager;
 
-    #showDrawerHandle = computed(() => {
-        if (!this.#drawer) return false;
-
-        const isVertical = this.#drawer.isVertical;
-        const showHandle = this.#showHandle.value;
-        const hasManualHandle = this.querySelector("vaul-drawer-handle");
-
-        return isVertical && showHandle && !hasManualHandle;
-    });
-
     private static attributeConfigs = [attr.boolean("show-handle", true)] as const;
-
     private static parsers = createParsersFromConfig(VaulDrawerPortal.attributeConfigs);
 
     // === Web Component Lifecycle ===
@@ -223,7 +212,6 @@ export class VaulDrawerPortal extends HTMLElement {
         }
 
         if (!this.#drawer) return;
-        this.#registerDrawerHandle();
         this.#setupGestureManager();
         this.#setupScrollManager();
     }
@@ -248,10 +236,22 @@ export class VaulDrawerPortal extends HTMLElement {
         const style = document.createElement("style");
         style.textContent = portalStyles;
         this.dialog = document.createElement("dialog");
+
+        // Create flex wrapper for handle + content layout
+        const wrapper = document.createElement("div");
+        wrapper.className = "drawer-wrapper";
+
+        // Create permanent handle element
+        this.#builtInHandle = document.createElement("vaul-drawer-handle");
+        this.#builtInHandle.className = "drawer-handle";
+
         const slot = document.createElement("slot");
+
         shadow.appendChild(style);
         shadow.appendChild(this.dialog);
-        this.dialog.appendChild(slot);
+        this.dialog.appendChild(wrapper);
+        wrapper.appendChild(this.#builtInHandle);
+        wrapper.appendChild(slot);
     }
 
     #setupDrawerRef() {
@@ -265,10 +265,15 @@ export class VaulDrawerPortal extends HTMLElement {
     #bindDrawerAttributes() {
         if (!this.#drawer) return;
         this.#effectCleanups.push(
-            ...[
-                effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)),
-                effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed")),
-            ]
+            effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)),
+            effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed")),
+            effect(() => {
+                const direction = this.#drawer!.direction;
+                const isVertical = direction === "top" || direction === "bottom";
+                const showHandle = this.#showHandle.value && isVertical && !this.querySelector("vaul-drawer-handle");
+
+                this.#builtInHandle.setAttribute("data-show", showHandle ? "true" : "false");
+            })
         );
     }
 
@@ -409,6 +414,8 @@ export class VaulDrawerPortal extends HTMLElement {
 
     #handlePointerMove = (event: PointerEvent) => {
         if (!this.#drawer || !this.#drawer.open) return;
+        // Ignore dragging on backdrop (will get dialog element in event target while dragging ::backdrop)
+        if (event.target === this.dialog) return;
 
         logger.debug("VaulDrawerPortal: Pointer move", {
             x: event.pageX,
@@ -458,59 +465,6 @@ export class VaulDrawerPortal extends HTMLElement {
 
     handleTouchMove(event: TouchEvent): void {
         this.#gestureManager.handleTouchMove(event);
-    }
-
-    // === Handle Management Methods ===
-    #registerDrawerHandle() {
-        this.#effectCleanups.push(
-            effect(() => {
-                const shouldShow = this.#showDrawerHandle.value;
-                // need to replace hanlde position when direction changes
-                const direction = this.#drawer!.direction;
-
-                logger.debug(`VaulDrawerPortal: Handle effect - shouldShow: ${shouldShow}, direction: ${direction}`);
-
-                if (shouldShow) {
-                    this.#removeBuiltInHandle();
-                    this.#addBuiltInHandle();
-                } else {
-                    this.#removeBuiltInHandle();
-                }
-            })
-        );
-    }
-
-    #addBuiltInHandle() {
-        if (this.#builtInHandle) return;
-        const handle = document.createElement("vaul-drawer-handle");
-        const direction = this.#drawer!.direction;
-        handle.setAttribute("data-drawer-direction", direction);
-
-        if (direction === "bottom") {
-            this.dialog.insertBefore(handle, this.dialog.firstChild);
-        } else if (direction === "top") {
-            this.dialog.appendChild(handle);
-        }
-
-        this.#builtInHandle = handle;
-        logger.debug(`VaulDrawerPortal: Built-in handle added for vertical drawer`);
-    }
-
-    #removeBuiltInHandle() {
-        if (!this.#builtInHandle?.parentNode) return;
-
-        this.#builtInHandle.parentNode.removeChild(this.#builtInHandle);
-        this.#builtInHandle = undefined;
-        logger.debug("VaulDrawerPortal: Built-in handle removed");
-    }
-
-    // === Getters & Setters ===
-    get showHandle() {
-        return this.#showHandle.value;
-    }
-
-    set showHandle(value: boolean) {
-        this.#showHandle.value = value;
     }
 }
 
