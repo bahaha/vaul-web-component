@@ -9,14 +9,14 @@ A customizable drawer web component inspired by [Vaul](https://github.com/emilko
 
 ## Features
 
-- **Native Web Components** - Works with any framework or vanilla JavaScript
-- **Accessible** - Built with native `<dialog>` element and proper ARIA attributes
-- **Directional** - Supports top, bottom, left, and right drawer positioning
-- **Smooth Animations** - CSS-based animations with customizable easing
-- **Drag to Dismiss** - Interactive gesture support for closing drawers
-- **Focus Management** - Automatic focus trapping and restoration
-- **Scroll Lock** - Prevents body scrolling when drawer is open
-- **TypeScript** - Full TypeScript support with type definitions
+-   **Native Web Components** - Works with any framework or vanilla JavaScript
+-   **Accessible** - Built with native `<dialog>` element and proper ARIA attributes
+-   **Directional** - Supports top, bottom, left, and right drawer positioning
+-   **Smooth Animations** - CSS-based animations with customizable easing
+-   **Drag to Dismiss** - Interactive gesture support for closing drawers
+-   **Focus Management** - Automatic focus trapping and restoration
+-   **Scroll Lock** - Prevents body scrolling when drawer is open
+-   **TypeScript** - Full TypeScript support with type definitions
 
 ## Installation
 
@@ -146,11 +146,11 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
 
 ## Live Examples
 
-- [Basic Bottom Drawer](https://codepen.io/bahaha/pen/GgpREpX) - Simple drawer with trigger button
-- [Directional Drawers](https://codepen.io/bahaha/pen/directional-drawers) - All four directions in one demo
-- [Custom Handle Examples](https://codepen.io/bahaha/pen/custom-handle-examples) - Different handle styles and animations
-- [Rich Styled Drawer](https://codepen.io/bahaha/pen/rich-styled-drawer) - Advanced styling with animations and effects
-- [Dismissible Behavior](https://codepen.io/bahaha/pen/dismissible-behavior) - Different dismissal behaviors and use cases
+-   [Basic Bottom Drawer](https://codepen.io/bahaha/pen/GgpREpX) - Simple drawer with trigger button
+-   [Directional Drawers](https://codepen.io/bahaha/pen/directional-drawers) - All four directions in one demo
+-   [Custom Handle Examples](https://codepen.io/bahaha/pen/custom-handle-examples) - Different handle styles and animations
+-   [Rich Styled Drawer](https://codepen.io/bahaha/pen/rich-styled-drawer) - Advanced styling with animations and effects
+-   [Dismissible Behavior](https://codepen.io/bahaha/pen/dismissible-behavior) - Different dismissal behaviors and use cases
 
 > **📁 More Examples**: Check out the [`/codepen-examples`](./codepen-examples) folder for additional ready-to-use examples with comprehensive documentation.
 
@@ -164,14 +164,14 @@ The main container component that manages the drawer state.
 
 **Attributes:**
 
-- `direction` - Drawer direction: `"top"`, `"bottom"` (default), `"left"`, `"right"`
-- `dismissible` - Boolean attribute to control backdrop dismissal: `"true"` (default), `"false"`
-- `open` - Boolean attribute to control drawer state programmatically
+-   `direction` - Drawer direction: `"top"`, `"bottom"` (default), `"left"`, `"right"`
+-   `dismissible` - Boolean attribute to control backdrop dismissal: `"true"` (default), `"false"`
+-   `open` - Boolean attribute to control drawer state programmatically
 
 **Events:**
 
-- `drawer-open` - Fired when drawer opens
-- `drawer-close` - Fired when drawer closes
+-   `drawer-open` - Fired when drawer opens
+-   `drawer-close` - Fired when drawer closes
 
 #### `<vaul-drawer-trigger>`
 
@@ -183,7 +183,7 @@ Portal container that wraps the drawer content. **Required** for proper componen
 
 **Attributes:**
 
-- `show-handle` - Boolean attribute to control built-in handle visibility: `"true"` (default), `"false"`
+-   `show-handle` - Boolean attribute to control built-in handle visibility: `"true"` (default), `"false"`
 
 #### `<vaul-drawer-content>`
 
@@ -249,9 +249,9 @@ vaul-drawer-trigger button {
 
 ## Browser Support
 
-- Chrome/Edge 88+
-- Firefox 98+
-- Safari 15.4+
+-   Chrome/Edge 88+
+-   Firefox 98+
+-   Safari 15.4+
 
 ## Inspiration
 
@@ -261,13 +261,13 @@ This project is inspired by Emil Kowalski's excellent [Vaul](https://github.com/
 
 ### Tech Stack
 
-- [Bun](https://bunpkg.com/) - Package manager and runtime
-- [Vite](https://vitejs.dev/) - Build tool
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Vitest](https://vitest.dev/) - Unit testing
-- [Playwright](https://playwright.dev/) - E2E testing
-- [Prettier](https://prettier.io/) - Code formatting
-- [oxlint](https://oxc.rs/) - Fast linting
+-   [Bun](https://bunpkg.com/) - Package manager and runtime
+-   [Vite](https://vitejs.dev/) - Build tool
+-   [TypeScript](https://www.typescriptlang.org/) - Type safety
+-   [Vitest](https://vitest.dev/) - Unit testing
+-   [Playwright](https://playwright.dev/) - E2E testing
+-   [Prettier](https://prettier.io/) - Code formatting
+-   [oxlint](https://oxc.rs/) - Fast linting
 
 ### Getting Started
 

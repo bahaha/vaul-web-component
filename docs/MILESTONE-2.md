@@ -8,21 +8,21 @@ Add directional positioning to drawers with auto-sizing and no animations.
 
 ### Direction Support
 
-- Add `direction` attribute to `<vaul-drawer>` element
-- Supported values: `top`, `bottom`, `left`, `right`
-- Default behavior: existing functionality (if no direction specified)
+-   Add `direction` attribute to `<vaul-drawer>` element
+-   Supported values: `top`, `bottom`, `left`, `right`
+-   Default behavior: existing functionality (if no direction specified)
 
 ### Auto-sizing
 
-- Drawer automatically sizes to fit content using CSS `fit-content`
-- Height adjusts for top/bottom directions
-- Width adjusts for left/right directions
+-   Drawer automatically sizes to fit content using CSS `fit-content`
+-   Height adjusts for top/bottom directions
+-   Width adjusts for left/right directions
 
 ### Positioning
 
-- Drawer appears from the specified edge of the viewport
-- Static positioning (no animations or transitions)
-- Proper viewport alignment for each direction
+-   Drawer appears from the specified edge of the viewport
+-   Static positioning (no animations or transitions)
+-   Proper viewport alignment for each direction
 
 ## Usage Examples
 
@@ -66,27 +66,27 @@ Add directional positioning to drawers with auto-sizing and no animations.
 
 ### Functionality
 
-- ✅ Drawer opens from specified direction
-- ✅ Content automatically sizes to fit using CSS `fit-content`
-- ✅ All existing functionality from Milestone 1 continues to work
-- ✅ Backward compatibility maintained (existing drawers work without direction)
+-   ✅ Drawer opens from specified direction
+-   ✅ Content automatically sizes to fit using CSS `fit-content`
+-   ✅ All existing functionality from Milestone 1 continues to work
+-   ✅ Backward compatibility maintained (existing drawers work without direction)
 
 ### Testing
 
-- ✅ All existing tests continue to pass
-- ✅ New tests added for each direction
-- ✅ Cross-browser compatibility verified
-- ✅ Auto-sizing behavior validated
+-   ✅ All existing tests continue to pass
+-   ✅ New tests added for each direction
+-   ✅ Cross-browser compatibility verified
+-   ✅ Auto-sizing behavior validated
 
 ### Technical Requirements
 
-- No animations or transitions (saved for future milestone)
-- Clean CSS implementation for positioning
-- Maintain existing architecture and patterns
-- Proper handling of edge cases and invalid direction values
+-   No animations or transitions (saved for future milestone)
+-   Clean CSS implementation for positioning
+-   Maintain existing architecture and patterns
+-   Proper handling of edge cases and invalid direction values
 
 ## Notes
 
-- This milestone focuses on positioning and sizing
-- Animation and transition effects will be addressed in a future milestone
-- Keep implementation simple and maintainable
+-   This milestone focuses on positioning and sizing
+-   Animation and transition effects will be addressed in a future milestone
+-   Keep implementation simple and maintainable
