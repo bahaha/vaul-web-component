@@ -6,7 +6,6 @@
 
     display: block;
     position: relative;
-    z-index: 20;
     margin: 8px 0;
     width: var(--vaul-handle-width);
     height: var(--vaul-handle-height);

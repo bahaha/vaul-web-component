@@ -19,14 +19,51 @@ dialog {
     touch-action: none;
     /* Drawer handle will be cutting off with overflow: auto; */
     overflow: visible;
-    /* Improve rendering during transforms */
     will-change: transform;
     backface-visibility: hidden;
+    display: flex;
 
-    &[data-state="open"] {
-        display: flex;
+    &[data-state="closed"] {
+        visibility: hidden;
+        opacity: 0;
     }
 
+    &[data-state="open"] {
+        visibility: visible;
+        opacity: 1;
+    }
+}
+
+.drawer-wrapper {
+    display: flex;
+    width: 100%;
+    /* Don't use height: 100% which creates circular dependency in Safari */
+    min-height: min-content;
+    flex: 1;
+}
+
+dialog[data-direction="bottom"] .drawer-wrapper {
+    flex-direction: column;
+}
+
+dialog[data-direction="top"] .drawer-wrapper {
+    flex-direction: column-reverse;
+}
+
+dialog[data-direction="left"] .drawer-wrapper,
+dialog[data-direction="right"] .drawer-wrapper {
+    flex-direction: row;
+}
+
+.drawer-handle[data-show="false"] {
+    display: none;
+}
+
+.drawer-handle[data-show="true"] {
+    display: block;
+}
+
+dialog {
     &::backdrop {
         background: var(--vaul-drawer-backdrop);
         animation-duration: var(--vaul-drawer-duration);
@@ -54,15 +91,16 @@ dialog {
 @media (hover: hover) and (pointer: fine) {
     dialog {
         user-select: none;
+        -webkit-user-select: none;
     }
 }
 
 /* Horizontal drawers (top/bottom) */
 dialog[data-direction="top"],
 dialog[data-direction="bottom"] {
-    flex-direction: column;
     width: 100%;
-    height: fit-content;
+    /* Remove fit-content which causes issues in Safari with flex children */
+    min-height: min-content;
     max-width: 100%;
 }
 
@@ -113,7 +151,8 @@ dialog[data-direction="bottom"] {
 /* Vertical drawers (left/right) */
 dialog[data-direction="left"],
 dialog[data-direction="right"] {
-    width: fit-content;
+    /* Use min-width instead of fit-content for Safari compatibility */
+    min-width: min-content;
     height: 100%;
     max-height: 100%;
 }

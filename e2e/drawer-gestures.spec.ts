@@ -523,7 +523,7 @@ test(
                 <vaul-drawer direction="bottom">
                     <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
                     <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
-                        <vaul-drawer-content style="height: ${colorSectionHeight}px; overflow-y: auto;">
+                        <vaul-drawer-content style="max-height: ${colorSectionHeight}px; overflow-y: auto;">
                             <div style="height: ${colorSectionHeight}px; background: red;" data-testid="red-section">RED CONTENT SECTION</div>
                             <div style="height: ${colorSectionHeight}px; background: blue;" data-testid="blue-section">BLUE CONTENT SECTION</div>
                         </vaul-drawer-content>
@@ -555,7 +555,7 @@ test.skip(
                 <vaul-drawer direction="bottom">
                     <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
                     <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
-                        <vaul-drawer-content style="height: ${colorSectionHeight}px; overflow-y: scroll;">
+                        <vaul-drawer-content style="max-height: ${colorSectionHeight}px; overflow-y: scroll;">
                             <div style="height: ${colorSectionHeight}px; background: red;" data-testid="red-section">RED CONTENT SECTION</div>
                             <div style="height: ${colorSectionHeight}px; background: blue;" data-testid="blue-section">BLUE CONTENT SECTION</div>
                         </vaul-drawer-content>
@@ -587,7 +587,7 @@ function getDragToDismissDrawer(direction: Direction) {
         <vaul-drawer-trigger>Open drawer</vaul-drawer-trigger>
         <vaul-drawer-portal style="--vaul-drawer-duration: 100ms;">
             <vaul-drawer-content>
-                <div style="${dimension} background: #1989;" data-testid="hello_world">Hello Web Component Drawer!</div>
+                <div style="${dimension} background: #1989; opacity: 0.3;" data-testid="hello_world">Hello Web Component Drawer!</div>
             </vaul-drawer-content>
         </vaul-drawer-portal>
     </vaul-drawer>

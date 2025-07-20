@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Custom Handle Example - Vaul Web Component</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            /* Custom styles for drawer components */
+            vaul-drawer-content {
+                background: white;
+                border-radius: 12px 12px 0 0;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+                min-height: 300px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            /* Custom handle animations */
+            vaul-drawer-handle {
+                transition: all 0.2s ease;
+            }
+
+            vaul-drawer-handle:hover {
+                transform: scale(1.1);
+            }
+
+            vaul-drawer-handle:active {
+                transform: scale(0.95);
+            }
+
+            /* Fancy gradient handle */
+            .gradient-handle {
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+                background-size: 300% 300%;
+                animation: gradient-shift 3s ease infinite;
+                border-radius: 20px;
+                height: 6px;
+                width: 60px;
+                margin: 16px auto;
+                cursor: grab;
+                position: relative;
+            }
+
+            .gradient-handle:active {
+                cursor: grabbing;
+            }
+
+            .gradient-handle::before {
+                content: "";
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+                background-size: 300% 300%;
+                animation: gradient-shift 3s ease infinite;
+                border-radius: 20px;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                z-index: -1;
+            }
+
+            .gradient-handle:hover::before {
+                opacity: 0.3;
+            }
+
+            @keyframes gradient-shift {
+                0% {
+                    background-position: 0% 50%;
+                }
+                50% {
+                    background-position: 100% 50%;
+                }
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+
+            /* Pill-shaped handle */
+            .pill-handle {
+                background: #6366f1;
+                border-radius: 25px;
+                height: 8px;
+                width: 50px;
+                margin: 12px auto;
+                position: relative;
+                overflow: hidden;
+                cursor: grab;
+            }
+
+            .pill-handle:active {
+                cursor: grabbing;
+            }
+
+            .pill-handle::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                animation: shimmer 2s infinite;
+            }
+
+            @keyframes shimmer {
+                0% {
+                    left: -100%;
+                }
+                100% {
+                    left: 100%;
+                }
+            }
+
+            /* Dotted handle */
+            .dotted-handle {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 4px;
+                margin: 12px auto;
+                width: 60px;
+                height: 20px;
+                cursor: grab;
+            }
+
+            .dotted-handle:active {
+                cursor: grabbing;
+            }
+
+            .dotted-handle .dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: #ef4444;
+                animation: pulse-dot 1.5s infinite;
+            }
+
+            .dotted-handle .dot:nth-child(1) {
+                animation-delay: 0s;
+            }
+
+            .dotted-handle .dot:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .dotted-handle .dot:nth-child(3) {
+                animation-delay: 0.4s;
+            }
+
+            .dotted-handle .dot:nth-child(4) {
+                animation-delay: 0.6s;
+            }
+
+            .dotted-handle .dot:nth-child(5) {
+                animation-delay: 0.8s;
+            }
+
+            @keyframes pulse-dot {
+                0%,
+                100% {
+                    opacity: 0.3;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.3);
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Custom Handle Examples</h1>
+                <p class="text-gray-600">Customize drawer handles with CSS and Tailwind styling</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Default Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Default Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-gray-900">Default Handle</h2>
+                                    <p class="text-gray-600">This drawer uses the built-in default handle styling.</p>
+                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                        <h3 class="font-semibold text-gray-800 mb-2">Features:</h3>
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            <li>• Clean, minimal design</li>
+                                            <li>• Consistent across all drawers</li>
+                                            <li>• No custom CSS required</li>
+                                            <li>• Automatic positioning</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Custom Rose Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Rose Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal show-handle="false">
+                            <vaul-drawer-handle
+                                class="my-6 mx-auto w-20 h-2 bg-rose-500 rounded-lg shadow-lg hover:bg-rose-600 hover:shadow-xl transition-all duration-200"
+                            >
+                            </vaul-drawer-handle>
+                            <div class="px-6 pb-6">
+                                <h2 class="text-xl font-bold text-gray-900">Custom Rose Handle</h2>
+                                <p class="text-gray-600">
+                                    This drawer features a custom rose-colored handle with shadows and hover effects.
+                                </p>
+                                <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 mt-4">
+                                    <h3 class="font-semibold text-rose-800 mb-2">Customization:</h3>
+                                    <ul class="text-sm text-rose-700 space-y-1">
+                                        <li>• Custom rose color scheme</li>
+                                        <li>• Larger size for better touch targets</li>
+                                        <li>• Shadow effects for depth</li>
+                                        <li>• Hover animations</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Gradient Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Gradient Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal show-handle="false">
+                            <div class="gradient-handle"></div>
+                            <div class="px-6 pb-6">
+                                <h2 class="text-xl font-bold text-gray-900">Animated Gradient Handle</h2>
+                                <p class="text-gray-600">
+                                    This drawer features a colorful animated gradient handle with hover effects.
+                                </p>
+                                <div
+                                    class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4 mt-4"
+                                >
+                                    <h3 class="font-semibold text-purple-800 mb-2">Effects:</h3>
+                                    <ul class="text-sm text-purple-700 space-y-1">
+                                        <li>• Animated gradient background</li>
+                                        <li>• Hover glow effect</li>
+                                        <li>• Smooth scaling animations</li>
+                                        <li>• Eye-catching design</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Pill Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Pill Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal show-handle="false">
+                            <div class="pill-handle"></div>
+                            <div class="px-6 pb-6">
+                                <h2 class="text-xl font-bold text-gray-900">Pill Handle with Shimmer</h2>
+                                <p class="text-gray-600">
+                                    This drawer features a pill-shaped handle with a shimmer animation effect.
+                                </p>
+                                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mt-4">
+                                    <h3 class="font-semibold text-indigo-800 mb-2">Design:</h3>
+                                    <ul class="text-sm text-indigo-700 space-y-1">
+                                        <li>• Pill-shaped design</li>
+                                        <li>• Shimmer animation</li>
+                                        <li>• Clean modern look</li>
+                                        <li>• Subtle interaction feedback</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Dotted Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                Dotted Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal show-handle="false">
+                            <div class="dotted-handle">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                            <div class="px-6 pb-6">
+                                <h2 class="text-xl font-bold text-gray-900">Dotted Handle Animation</h2>
+                                <p class="text-gray-600">This drawer features a series of animated dots as a handle.</p>
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mt-4">
+                                    <h3 class="font-semibold text-red-800 mb-2">Animation:</h3>
+                                    <ul class="text-sm text-red-700 space-y-1">
+                                        <li>• Sequential dot pulsing</li>
+                                        <li>• Staggered animation timing</li>
+                                        <li>• Unique visual indicator</li>
+                                        <li>• Playful interaction</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- No Handle -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                No Handle
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal show-handle="false">
+                            <div class="px-6 py-6">
+                                <h2 class="text-xl font-bold text-gray-900">No Handle</h2>
+                                <p class="text-gray-600">
+                                    This drawer has no handle - dismissible only by clicking outside or using the ESC
+                                    key.
+                                </p>
+                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
+                                    <h3 class="font-semibold text-gray-800 mb-2">Use Cases:</h3>
+                                    <ul class="text-sm text-gray-700 space-y-1">
+                                        <li>• Modal-style behavior</li>
+                                        <li>• Clean minimal design</li>
+                                        <li>• Custom close buttons</li>
+                                        <li>• Keyboard-only dismissal</li>
+                                    </ul>
+                                </div>
+                                <button
+                                    onclick="closeDrawer()"
+                                    class="mt-4 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                                >
+                                    Close Drawer
+                                </button>
+                            </div>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-blue-50 rounded-lg p-6 border-l-4 border-blue-400">
+                <h3 class="text-lg font-bold mb-2 text-blue-900">💡 Handle Customization Tips</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h4 class="font-semibold text-blue-800 mb-2">Built-in Handles</h4>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• Automatic for vertical drawers</li>
+                            <li>• Consistent styling</li>
+                            <li>• No additional CSS needed</li>
+                            <li>• Respects safe areas</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-blue-800 mb-2">Custom Handles</h4>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• Use <code class="bg-blue-100 px-1 rounded">vaul-drawer-handle</code> element</li>
+                            <li>• Set <code class="bg-blue-100 px-1 rounded">show-handle="false"</code> on portal</li>
+                            <li>• Style with CSS or Tailwind</li>
+                            <li>• Add animations and effects</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-500">
+                    Built with
+                    <a
+                        href="https://www.npmjs.com/package/vaul-web-component"
+                        class="text-blue-600 hover:text-blue-800 underline"
+                        target="_blank"
+                    >
+                        Vaul Web Component
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <script type="module">
+            // Import Vaul Web Component from esm.sh
+            import "https://esm.sh/vaul-web-component@0.1.0";
+
+            // Make functions available globally
+            window.closeDrawer = function () {
+                const openDrawer = document.querySelector("vaul-drawer[open]");
+                if (openDrawer) {
+                    openDrawer.removeAttribute("open");
+                }
+            };
+
+            // Log events for debugging
+            document.addEventListener("DOMContentLoaded", function () {
+                const drawers = document.querySelectorAll("vaul-drawer");
+
+                drawers.forEach(drawer => {
+                    drawer.addEventListener("drawer-open", function () {
+                        console.log("Drawer opened with custom handle");
+                    });
+
+                    drawer.addEventListener("drawer-close", function () {
+                        console.log("Drawer closed");
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

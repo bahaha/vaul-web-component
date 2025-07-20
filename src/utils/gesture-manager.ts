@@ -60,6 +60,7 @@ export class GestureManager {
     #scrollTolerance: number;
     #callbacks: Required<Pick<GestureManagerOptions, "onDragStart" | "onDrag" | "onDragEnd">>;
     #effectCleanups: (() => void)[] = [];
+    #isAllowedToDrag = false;
 
     #isVertical = computed(() => {
         const direction = this.#direction.value;
@@ -228,14 +229,19 @@ export class GestureManager {
         this.#gesture.value = "dragging";
         this.#callbacks.onDragStart();
 
+        if (isIOS()) {
+            window.addEventListener("touchend", () => (this.#isAllowedToDrag = false), { once: true });
+        }
+
         logger.debug("GestureManager: Drag started");
     }
 
     handlePointerMove(event: PointerEvent): void {
         if (this.#gesture.value !== "dragging") return;
         if (!this.#pointerStart.value) return;
-        if (!this.#shouldDrag(event.target)) return;
+        if (!this.#isAllowedToDrag && !this.#shouldDrag(event.target)) return;
 
+        this.#isAllowedToDrag = true;
         this.#lastPointer.value = this.#currentPointer.value;
         this.#currentPointer.value = { x: event.pageX, y: event.pageY };
     }
@@ -257,6 +263,7 @@ export class GestureManager {
         this.#lastPointer.value = { x: 0, y: 0 };
         this.#dragStartTime.value = 0;
         this.#releaseTime.value = 0;
+        this.#isAllowedToDrag = false;
     }
 
     #shouldDrag(target: EventTarget | null): boolean {
@@ -337,4 +344,8 @@ export class GestureManager {
         assert(value <= 0 || value > 1, "closeThreshold is distance threshold as ratio (0-1) for dismissal");
         this.#closeThreshold.value = value;
     }
+}
+
+function isIOS(): boolean {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
 }

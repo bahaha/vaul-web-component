@@ -54,40 +54,42 @@
                             </button>
                         </vaul-drawer-trigger>
 
-                        <vaul-drawer-content class="p-6">
-                            <vaul-drawer-handle></vaul-drawer-handle>
-                            <div class="space-y-4">
-                                <h2 class="text-xl font-bold text-gray-900">Welcome to the Drawer</h2>
-                                <p class="text-gray-600">
-                                    This is a basic bottom drawer implementation using Vaul Web Component. You can drag
-                                    the handle to dismiss it or click outside to close.
-                                </p>
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <h3 class="font-semibold text-blue-800 mb-2">Features:</h3>
-                                    <ul class="text-sm text-blue-700 space-y-1">
-                                        <li>• Smooth slide-up animation</li>
-                                        <li>• Drag to dismiss functionality</li>
-                                        <li>• Click outside to close</li>
-                                        <li>• Keyboard accessible (ESC key)</li>
-                                        <li>• Focus trap for accessibility</li>
-                                    </ul>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <vaul-drawer-handle></vaul-drawer-handle>
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-gray-900">Welcome to the Drawer</h2>
+                                    <p class="text-gray-600">
+                                        This is a basic bottom drawer implementation using Vaul Web Component. You can
+                                        drag the handle to dismiss it or click outside to close.
+                                    </p>
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <h3 class="font-semibold text-blue-800 mb-2">Features:</h3>
+                                        <ul class="text-sm text-blue-700 space-y-1">
+                                            <li>• Smooth slide-up animation</li>
+                                            <li>• Drag to dismiss functionality</li>
+                                            <li>• Click outside to close</li>
+                                            <li>• Keyboard accessible (ESC key)</li>
+                                            <li>• Focus trap for accessibility</li>
+                                        </ul>
+                                    </div>
+                                    <div class="flex gap-3 pt-4">
+                                        <button
+                                            onclick="closeDrawer()"
+                                            class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onclick="confirmAction()"
+                                            class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                                        >
+                                            Confirm
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="flex gap-3 pt-4">
-                                    <button
-                                        onclick="closeDrawer()"
-                                        class="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onclick="confirmAction()"
-                                        class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                                    >
-                                        Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </vaul-drawer-content>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
                     </vaul-drawer>
                 </div>
 

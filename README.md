@@ -52,13 +52,15 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
         <button>Open Drawer</button>
     </vaul-drawer-trigger>
 
-    <vaul-drawer-content>
-        <vaul-drawer-handle></vaul-drawer-handle>
-        <div class="drawer-body">
-            <h2>Drawer Content</h2>
-            <p>This is the content of the drawer.</p>
-        </div>
-    </vaul-drawer-content>
+    <vaul-drawer-portal>
+        <vaul-drawer-content>
+            <vaul-drawer-handle></vaul-drawer-handle>
+            <div class="drawer-body">
+                <h2>Drawer Content</h2>
+                <p>This is the content of the drawer.</p>
+            </div>
+        </vaul-drawer-content>
+    </vaul-drawer-portal>
 </vaul-drawer>
 ```
 
@@ -72,13 +74,15 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
         <button>Open Bottom Drawer</button>
     </vaul-drawer-trigger>
 
-    <vaul-drawer-content>
-        <vaul-drawer-handle></vaul-drawer-handle>
-        <div style="padding: 20px;">
-            <h3>Bottom Drawer</h3>
-            <p>Slides up from the bottom of the screen.</p>
-        </div>
-    </vaul-drawer-content>
+    <vaul-drawer-portal>
+        <vaul-drawer-content>
+            <vaul-drawer-handle></vaul-drawer-handle>
+            <div style="padding: 20px;">
+                <h3>Bottom Drawer</h3>
+                <p>Slides up from the bottom of the screen.</p>
+            </div>
+        </vaul-drawer-content>
+    </vaul-drawer-portal>
 </vaul-drawer>
 ```
 
@@ -90,13 +94,15 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
         <button>Open Top Drawer</button>
     </vaul-drawer-trigger>
 
-    <vaul-drawer-content>
-        <vaul-drawer-handle></vaul-drawer-handle>
-        <div style="padding: 20px;">
-            <h3>Top Drawer</h3>
-            <p>Slides down from the top of the screen.</p>
-        </div>
-    </vaul-drawer-content>
+    <vaul-drawer-portal>
+        <vaul-drawer-content>
+            <vaul-drawer-handle></vaul-drawer-handle>
+            <div style="padding: 20px;">
+                <h3>Top Drawer</h3>
+                <p>Slides down from the top of the screen.</p>
+            </div>
+        </vaul-drawer-content>
+    </vaul-drawer-portal>
 </vaul-drawer>
 ```
 
@@ -108,12 +114,14 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
         <button>Open Left Drawer</button>
     </vaul-drawer-trigger>
 
-    <vaul-drawer-content>
-        <div style="padding: 20px;">
-            <h3>Left Drawer</h3>
-            <p>Slides in from the left side.</p>
-        </div>
-    </vaul-drawer-content>
+    <vaul-drawer-portal>
+        <vaul-drawer-content>
+            <div style="padding: 20px;">
+                <h3>Left Drawer</h3>
+                <p>Slides in from the left side.</p>
+            </div>
+        </vaul-drawer-content>
+    </vaul-drawer-portal>
 </vaul-drawer>
 ```
 
@@ -125,21 +133,26 @@ import { VaulDrawer, VaulDrawerTrigger, VaulDrawerContent, VaulDrawerHandle } fr
         <button>Open Right Drawer</button>
     </vaul-drawer-trigger>
 
-    <vaul-drawer-content>
-        <div style="padding: 20px;">
-            <h3>Right Drawer</h3>
-            <p>Slides in from the right side.</p>
-        </div>
-    </vaul-drawer-content>
+    <vaul-drawer-portal>
+        <vaul-drawer-content>
+            <div style="padding: 20px;">
+                <h3>Right Drawer</h3>
+                <p>Slides in from the right side.</p>
+            </div>
+        </vaul-drawer-content>
+    </vaul-drawer-portal>
 </vaul-drawer>
 ```
 
 ## Live Examples
 
-- [Basic Bottom Drawer](https://codepen.io/your-username/pen/basic-bottom-drawer) - Simple drawer with trigger button
-- [Multi-directional Drawers](https://codepen.io/your-username/pen/multi-directional-drawers) - All four directions in one demo
-- [Styled Drawer with Animation](https://codepen.io/your-username/pen/styled-drawer-animation) - Custom styling and effects
-- [Form Inside Drawer](https://codepen.io/your-username/pen/form-inside-drawer) - Contact form implementation
+- [Basic Bottom Drawer](https://codepen.io/bahaha/pen/GgpREpX) - Simple drawer with trigger button
+- [Directional Drawers](https://codepen.io/bahaha/pen/directional-drawers) - All four directions in one demo
+- [Custom Handle Examples](https://codepen.io/bahaha/pen/custom-handle-examples) - Different handle styles and animations
+- [Rich Styled Drawer](https://codepen.io/bahaha/pen/rich-styled-drawer) - Advanced styling with animations and effects
+- [Dismissible Behavior](https://codepen.io/bahaha/pen/dismissible-behavior) - Different dismissal behaviors and use cases
+
+> **📁 More Examples**: Check out the [`/codepen-examples`](./codepen-examples) folder for additional ready-to-use examples with comprehensive documentation.
 
 ## API Reference
 
@@ -152,6 +165,7 @@ The main container component that manages the drawer state.
 **Attributes:**
 
 - `direction` - Drawer direction: `"top"`, `"bottom"` (default), `"left"`, `"right"`
+- `dismissible` - Boolean attribute to control backdrop dismissal: `"true"` (default), `"false"`
 - `open` - Boolean attribute to control drawer state programmatically
 
 **Events:**
@@ -163,13 +177,21 @@ The main container component that manages the drawer state.
 
 Wrapper for the trigger element that opens the drawer.
 
+#### `<vaul-drawer-portal>`
+
+Portal container that wraps the drawer content. **Required** for proper component structure.
+
+**Attributes:**
+
+- `show-handle` - Boolean attribute to control built-in handle visibility: `"true"` (default), `"false"`
+
 #### `<vaul-drawer-content>`
 
-Container for the drawer content. Uses native `<dialog>` element.
+Container for the drawer content. Uses native `<dialog>` element for accessibility.
 
 #### `<vaul-drawer-handle>`
 
-Drag handle for gesture-based drawer interactions (optional).
+Drag handle for gesture-based drawer interactions (optional). Can be used for custom handle styling.
 
 ### Programmatic Control
 
