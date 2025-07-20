@@ -1,4 +1,7 @@
 :host {
     display: block;
     overflow: auto;
+    /* Ensure content grows to fill available space in Safari */
+    flex: 1;
+    min-height: 0;
 }

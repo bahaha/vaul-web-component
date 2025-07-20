@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Dismissible Behavior - Vaul Web Component</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            /* Custom styles for drawer components */
+            vaul-drawer-content {
+                background: white;
+                border-radius: 12px 12px 0 0;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+                min-height: 250px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            /* Modal-style drawer */
+            .modal-drawer vaul-drawer-content {
+                border-radius: 16px;
+                box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+                border: 2px solid #e5e7eb;
+            }
+
+            /* Warning styles */
+            .warning-drawer vaul-drawer-content {
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border: 2px solid #f59e0b;
+                box-shadow: 0 -4px 20px rgba(245, 158, 11, 0.2);
+            }
+
+            /* Success styles */
+            .success-drawer vaul-drawer-content {
+                background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+                border: 2px solid #10b981;
+                box-shadow: 0 -4px 20px rgba(16, 185, 129, 0.2);
+            }
+
+            /* Info styles */
+            .info-drawer vaul-drawer-content {
+                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                border: 2px solid #3b82f6;
+                box-shadow: 0 -4px 20px rgba(59, 130, 246, 0.2);
+            }
+
+            /* Confirmation dialog styles */
+            .confirmation-drawer vaul-drawer-content {
+                background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+                border: 2px solid #ef4444;
+                box-shadow: 0 -4px 20px rgba(239, 68, 68, 0.2);
+            }
+
+            /* Background overlay styling */
+            .overlay-demo {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(4px);
+                z-index: 40;
+                pointer-events: none;
+            }
+
+            /* Demonstration content */
+            .demo-content {
+                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+
+            /* Interactive elements */
+            .interactive-element {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+
+            .interactive-element:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Status indicators */
+            .status-indicator {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                display: inline-block;
+                margin-right: 8px;
+                animation: pulse 2s infinite;
+            }
+
+            .status-indicator.dismissible {
+                background: #10b981;
+            }
+
+            .status-indicator.non-dismissible {
+                background: #ef4444;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Dismissible Behavior Examples</h1>
+                <p class="text-gray-600">Demonstrating different dismissible behaviors and use cases</p>
+            </header>
+
+            <!-- Test Background Elements -->
+            <div class="fixed top-4 right-4 space-y-2 z-10">
+                <button
+                    id="bg-button-1"
+                    class="block px-3 py-2 bg-red-500 text-white text-sm rounded shadow hover:bg-red-600 focus:ring-2 focus:ring-red-300 transition-all"
+                    title="Background element - should not be focusable when modal is open"
+                >
+                    BG Test 1
+                </button>
+                <button
+                    id="bg-button-2"
+                    class="block px-3 py-2 bg-orange-500 text-white text-sm rounded shadow hover:bg-orange-600 focus:ring-2 focus:ring-orange-300 transition-all"
+                    title="Background element - should not be focusable when modal is open"
+                >
+                    BG Test 2
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dismissible Drawer (Default) -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator dismissible"></div>
+                        <span class="text-sm font-medium text-green-800">Dismissible</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="true" class="success-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ✅ Dismissible Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-green-900">Dismissible Drawer</h2>
+                                    <p class="text-green-700">
+                                        This drawer can be dismissed by clicking the backdrop, pressing ESC, or dragging
+                                        the handle.
+                                    </p>
+                                    <div class="demo-content">
+                                        <h3 class="font-semibold text-green-800 mb-2">Dismissal Methods:</h3>
+                                        <ul class="text-sm text-green-700 space-y-1">
+                                            <li>• Click outside the drawer (backdrop)</li>
+                                            <li>• Press the ESC key</li>
+                                            <li>• Drag the handle down (mobile)</li>
+                                            <li>• Swipe down on touch devices</li>
+                                            <li>• Programmatic close via JavaScript</li>
+                                        </ul>
+                                    </div>
+                                    <div class="text-center">
+                                        <button
+                                            onclick="confirmAction('dismissible')"
+                                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                                        >
+                                            Confirm Action
+                                        </button>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Non-Dismissible Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator non-dismissible"></div>
+                        <span class="text-sm font-medium text-red-800">Non-Dismissible</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="false" class="warning-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ⚠️ Non-Dismissible Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-yellow-900">Non-Dismissible Drawer</h2>
+                                    <p class="text-yellow-700">
+                                        This drawer cannot be dismissed by clicking the backdrop. User must take
+                                        explicit action.
+                                    </p>
+                                    <div class="demo-content">
+                                        <h3 class="font-semibold text-yellow-800 mb-2">Available Actions:</h3>
+                                        <ul class="text-sm text-yellow-700 space-y-1">
+                                            <li>• ESC key still works for accessibility</li>
+                                            <li>• Handle dragging still works</li>
+                                            <li>• Backdrop clicks are ignored</li>
+                                            <li>• Must use explicit close buttons</li>
+                                        </ul>
+                                    </div>
+                                    <div class="text-center space-x-2">
+                                        <button
+                                            onclick="cancelAction()"
+                                            class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onclick="confirmAction('non-dismissible')"
+                                            class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+                                        >
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Modal-Style Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator non-dismissible"></div>
+                        <span class="text-sm font-medium text-blue-800">Modal Style</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="false" class="modal-drawer info-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ℹ️ Modal-Style Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <h2 class="text-xl font-bold text-blue-900">Information Modal</h2>
+                                        <button
+                                            onclick="closeModal()"
+                                            class="text-blue-500 hover:text-blue-700 text-xl font-bold"
+                                            title="Close modal"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                    <p class="text-blue-700">
+                                        This drawer behaves like a traditional modal dialog with explicit close
+                                        controls.
+                                    </p>
+                                    <div class="demo-content">
+                                        <h3 class="font-semibold text-blue-800 mb-2">Modal Characteristics:</h3>
+                                        <ul class="text-sm text-blue-700 space-y-1">
+                                            <li>• Backdrop clicks disabled</li>
+                                            <li>• Focus trapped within modal</li>
+                                            <li>• Clear close button (×) provided</li>
+                                            <li>• Explicit action required</li>
+                                            <li>• Perfect for critical information</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-blue-50 border border-blue-200 rounded p-3">
+                                        <p class="text-sm text-blue-700">
+                                            <strong>Use Case:</strong> Critical information, confirmations, or forms
+                                            that require user attention.
+                                        </p>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Confirmation Dialog -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator non-dismissible"></div>
+                        <span class="text-sm font-medium text-red-800">Confirmation</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="false" class="confirmation-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                🗑️ Delete Confirmation
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <div class="text-center">
+                                        <div
+                                            class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4"
+                                        >
+                                            <span class="text-2xl">⚠️</span>
+                                        </div>
+                                        <h2 class="text-xl font-bold text-red-900">Confirm Deletion</h2>
+                                        <p class="text-red-700 mt-2">
+                                            Are you sure you want to delete this item? This action cannot be undone.
+                                        </p>
+                                    </div>
+                                    <div class="demo-content">
+                                        <h3 class="font-semibold text-red-800 mb-2">What will be deleted:</h3>
+                                        <ul class="text-sm text-red-700 space-y-1">
+                                            <li>• User account and all data</li>
+                                            <li>• All associated files</li>
+                                            <li>• Purchase history</li>
+                                            <li>• Saved preferences</li>
+                                        </ul>
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button
+                                            onclick="cancelDelete()"
+                                            class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onclick="confirmDelete()"
+                                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                        >
+                                            Delete Forever
+                                        </button>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Form Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator non-dismissible"></div>
+                        <span class="text-sm font-medium text-purple-800">Form Protection</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="false" class="info-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                📝 Form Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-purple-900">Contact Form</h2>
+                                    <p class="text-purple-700">
+                                        This form drawer prevents accidental dismissal to protect user input.
+                                    </p>
+                                    <form class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-800 mb-1">Name</label>
+                                            <input
+                                                type="text"
+                                                class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="Enter your name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-800 mb-1">Email</label>
+                                            <input
+                                                type="email"
+                                                class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                placeholder="Enter your email"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-purple-800 mb-1"
+                                                >Message</label
+                                            >
+                                            <textarea
+                                                class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent h-20"
+                                                placeholder="Enter your message"
+                                            ></textarea>
+                                        </div>
+                                    </form>
+                                    <div class="flex space-x-3">
+                                        <button
+                                            onclick="cancelForm()"
+                                            class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onclick="submitForm()"
+                                            class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                                        >
+                                            Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Quick Action Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center interactive-element">
+                    <div class="mb-4">
+                        <div class="status-indicator dismissible"></div>
+                        <span class="text-sm font-medium text-green-800">Quick Dismiss</span>
+                    </div>
+                    <vaul-drawer direction="bottom" dismissible="true" class="success-drawer">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ⚡ Quick Action
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-portal>
+                            <vaul-drawer-content class="p-6">
+                                <div class="space-y-4">
+                                    <h2 class="text-xl font-bold text-teal-900">Quick Actions</h2>
+                                    <p class="text-teal-700">
+                                        Quick actions that can be easily dismissed for better user experience.
+                                    </p>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button
+                                            class="px-4 py-3 bg-teal-100 hover:bg-teal-200 text-teal-800 rounded-lg transition-colors"
+                                        >
+                                            📤 Share
+                                        </button>
+                                        <button
+                                            class="px-4 py-3 bg-teal-100 hover:bg-teal-200 text-teal-800 rounded-lg transition-colors"
+                                        >
+                                            ❤️ Like
+                                        </button>
+                                        <button
+                                            class="px-4 py-3 bg-teal-100 hover:bg-teal-200 text-teal-800 rounded-lg transition-colors"
+                                        >
+                                            💾 Save
+                                        </button>
+                                        <button
+                                            class="px-4 py-3 bg-teal-100 hover:bg-teal-200 text-teal-800 rounded-lg transition-colors"
+                                        >
+                                            🔗 Copy Link
+                                        </button>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-sm text-teal-600">
+                                            <strong>Tip:</strong> Click outside or press ESC to quickly dismiss
+                                        </p>
+                                    </div>
+                                </div>
+                            </vaul-drawer-content>
+                        </vaul-drawer-portal>
+                    </vaul-drawer>
+                </div>
+            </div>
+
+            <div class="mt-8 bg-gray-100 rounded-lg p-6">
+                <h3 class="text-lg font-bold mb-4 text-center">🎯 Dismissible Behavior Guide</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-lg p-4">
+                        <h4 class="font-semibold text-green-800 mb-2">✅ When to use DISMISSIBLE</h4>
+                        <ul class="text-sm text-green-700 space-y-1">
+                            <li>• Quick actions and menus</li>
+                            <li>• Non-critical information</li>
+                            <li>• User preferences and settings</li>
+                            <li>• Content browsing (filters, options)</li>
+                            <li>• Social actions (share, like)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg p-4">
+                        <h4 class="font-semibold text-red-800 mb-2">🚫 When to use NON-DISMISSIBLE</h4>
+                        <ul class="text-sm text-red-700 space-y-1">
+                            <li>• Critical confirmations (delete, purchase)</li>
+                            <li>• Forms with user input</li>
+                            <li>• Important notices and warnings</li>
+                            <li>• Authentication flows</li>
+                            <li>• Multi-step processes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <p class="text-sm text-gray-500">
+                    Built with
+                    <a
+                        href="https://www.npmjs.com/package/vaul-web-component"
+                        class="text-blue-600 hover:text-blue-800 underline"
+                        target="_blank"
+                    >
+                        Vaul Web Component
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <script type="module">
+            // Import Vaul Web Component from esm.sh
+            import "https://esm.sh/vaul-web-component@0.1.0";
+
+            // Global action functions
+            window.confirmAction = function (type) {
+                alert(`Action confirmed in ${type} drawer!`);
+                closeCurrentDrawer();
+            };
+
+            window.cancelAction = function () {
+                closeCurrentDrawer();
+            };
+
+            window.closeModal = function () {
+                closeCurrentDrawer();
+            };
+
+            window.confirmDelete = function () {
+                alert("Item deleted successfully!");
+                closeCurrentDrawer();
+            };
+
+            window.cancelDelete = function () {
+                closeCurrentDrawer();
+            };
+
+            window.submitForm = function () {
+                alert("Form submitted successfully!");
+                closeCurrentDrawer();
+            };
+
+            window.cancelForm = function () {
+                if (confirm("Are you sure you want to cancel? Any unsaved changes will be lost.")) {
+                    closeCurrentDrawer();
+                }
+            };
+
+            function closeCurrentDrawer() {
+                const openDrawer = document.querySelector("vaul-drawer[open]");
+                if (openDrawer) {
+                    openDrawer.removeAttribute("open");
+                }
+            }
+
+            // Log events for debugging
+            document.addEventListener("DOMContentLoaded", function () {
+                const drawers = document.querySelectorAll("vaul-drawer");
+
+                drawers.forEach(drawer => {
+                    const dismissible = drawer.getAttribute("dismissible") !== "false";
+
+                    drawer.addEventListener("drawer-open", function () {
+                        console.log(`Drawer opened - Dismissible: ${dismissible}`);
+                    });
+
+                    drawer.addEventListener("drawer-close", function () {
+                        console.log(`Drawer closed - Dismissible: ${dismissible}`);
+                    });
+                });
+
+                // Background button interactions for testing focus trap
+                const bgButtons = document.querySelectorAll("#bg-button-1, #bg-button-2");
+                bgButtons.forEach(button => {
+                    button.addEventListener("click", function () {
+                        alert("Background button clicked - this should not happen when a modal is open!");
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

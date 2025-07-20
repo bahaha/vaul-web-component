@@ -4,32 +4,32 @@ import { createDrawer } from "./utils";
 test("should render built-in handle for bottom drawer", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "bottom" });
     await openDrawer();
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 });
 
 test("should render built-in handle for top drawer", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "top" });
     await openDrawer();
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 });
 
 test("should NOT render handle for left drawer", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "left" });
     await openDrawer();
-    await expect(elements.handle).not.toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(false);
 });
 
 test("should NOT render handle for right drawer", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "right" });
     await openDrawer();
-    await expect(elements.handle).not.toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(false);
 });
 
 test("should have minimum 44px touch target (bottom drawer)", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "bottom" });
     await openDrawer();
 
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 
     const hitArea = elements.handle.locator(".handle-hitarea");
     const touchTarget = await hitArea.boundingBox();
@@ -40,14 +40,14 @@ test("should have minimum 44px touch target (bottom drawer)", async ({ page }) =
     const isDesktopSize = touchTarget!.width === 32 && touchTarget!.height === 4;
 
     expect(hasTouchTarget || isDesktopSize).toBe(true);
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 });
 
 test("should have minimum 44px touch target (top drawer)", async ({ page }) => {
     const { openDrawer, elements } = await createDrawer({ page, direction: "top" });
     await openDrawer();
 
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 
     const hitArea = elements.handle.locator(".handle-hitarea");
     const touchTarget = await hitArea.boundingBox();
@@ -58,7 +58,7 @@ test("should have minimum 44px touch target (top drawer)", async ({ page }) => {
     const isDesktopSize = touchTarget!.width === 32 && touchTarget!.height === 4;
 
     expect(hasTouchTarget || isDesktopSize).toBe(true);
-    await expect(elements.handle).toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(true);
 });
 
 test('should NOT render handle when show-handle="false"', async ({ page }) => {
@@ -73,11 +73,9 @@ test('should NOT render handle when show-handle="false"', async ({ page }) => {
             </vaul-drawer>
         `;
 
-    const { openDrawer } = await createDrawer({ page, template });
+    const { openDrawer, elements } = await createDrawer({ page, template });
     await openDrawer();
-
-    const handle = page.locator("vaul-drawer-portal vaul-drawer-handle");
-    await expect(handle).not.toBeVisible();
+    expect(await elements.handle.isVisible()).toBe(false);
 });
 
 test('should render handle when show-handle="true" (explicit)', async ({ page }) => {
@@ -92,11 +90,11 @@ test('should render handle when show-handle="true" (explicit)', async ({ page })
             </vaul-drawer>
         `;
 
-    const { openDrawer } = await createDrawer({ page, template });
+    const { openDrawer, elements } = await createDrawer({ page, template });
     await openDrawer();
 
-    const handle = page.locator("vaul-drawer-portal vaul-drawer-handle");
-    await expect(handle).toBeVisible();
+    // Handle element exists and is shown via data-show="true"
+    expect(await elements.handle.isVisible()).toBe(true);
 });
 
 test("should render custom handle instead of built-in handle", async ({ page }) => {
@@ -114,17 +112,18 @@ test("should render custom handle instead of built-in handle", async ({ page }) 
             </vaul-drawer>
         `;
 
-    const { openDrawer } = await createDrawer({ page, template });
+    const { openDrawer, elements } = await createDrawer({ page, template });
     await openDrawer();
 
-    const customHandle = page.locator("vaul-drawer-handle").first();
+    // Custom handle should be visible, built-in handle should be hidden
+    const customHandle = page.locator("vaul-drawer-content vaul-drawer-handle");
     await expect(customHandle).toBeVisible();
 
     const backgroundColor = await customHandle.evaluate(el => window.getComputedStyle(el).backgroundColor);
     expect(backgroundColor).toBe("rgb(255, 0, 0)"); // red
 
-    const allHandles = page.locator("vaul-drawer-handle");
-    await expect(allHandles).toHaveCount(1);
+    // Built-in handle should be hidden due to custom handle presence
+    expect(await elements.handle.isVisible()).toBe(false);
 });
 
 test("should position custom handle correctly by user placement", async ({ page }) => {
@@ -146,7 +145,8 @@ test("should position custom handle correctly by user placement", async ({ page 
     const { openDrawer } = await createDrawer({ page, template });
     await openDrawer();
 
-    const customHandle = page.locator("vaul-drawer-handle");
+    // Be specific about which handle we're testing (the custom one in content)
+    const customHandle = page.locator("vaul-drawer-content vaul-drawer-handle");
     await expect(customHandle).toBeVisible();
 
     const prevSiblingText = await customHandle.evaluate(el => el.previousElementSibling?.textContent);

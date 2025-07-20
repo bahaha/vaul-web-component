@@ -507,6 +507,17 @@
                             defaultDirectionDisplay.textContent = direction;
                             customDirectionDisplay.textContent = direction;
 
+                            // Manage max-h-96 class based on direction
+                            const isVertical = direction === "top" || direction === "bottom";
+                            const defaultContent = defaultDrawer?.querySelector("vaul-drawer-content");
+                            if (defaultContent) {
+                                if (isVertical) {
+                                    defaultContent.classList.add("max-h-96");
+                                } else {
+                                    defaultContent.classList.remove("max-h-96");
+                                }
+                            }
+
                             console.log(`Direction changed to: ${direction}`);
                         }
                     });

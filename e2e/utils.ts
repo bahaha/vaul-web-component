@@ -28,7 +28,7 @@ export async function createDrawer(options: CreateDrawerOptions) {
     const trigger = page.locator("vaul-drawer-trigger");
     const portal = page.locator("vaul-drawer-portal");
     const content = page.locator("vaul-drawer-content");
-    const handle = portal.locator("vaul-drawer-handle");
+    const handle = portal.locator("vaul-drawer-handle[data-show]");
     const direction = (await page.locator("vaul-drawer").getAttribute("direction")) ?? "bottom";
     const dialog = page.locator("vaul-drawer-portal dialog");
 
@@ -84,10 +84,10 @@ export async function createDrawer(options: CreateDrawerOptions) {
     };
 
     const performDrag = async (options: { delta: [number, number]; duration?: number }) => {
-        const dialogBox = await dialog.boundingBox();
-        if (!dialogBox) return;
+        const contentBox = await content.boundingBox();
+        if (!contentBox) return;
 
-        const { x, y, width, height } = dialogBox;
+        const { x, y, width, height } = contentBox;
         const centerX = x + width / 2;
         const centerY = y + height / 2;
         const { delta, duration = 300 } = options;

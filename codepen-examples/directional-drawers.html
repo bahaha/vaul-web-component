@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Directional Drawers - Vaul Web Component</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            /* Custom styles for drawer components */
+            vaul-drawer-content {
+                background: white;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                min-height: 200px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+
+            /* Direction-specific styling */
+            vaul-drawer[direction="bottom"] vaul-drawer-content {
+                border-radius: 12px 12px 0 0;
+            }
+
+            vaul-drawer[direction="top"] vaul-drawer-content {
+                border-radius: 0 0 12px 12px;
+            }
+
+            vaul-drawer[direction="left"] vaul-drawer-content {
+                border-radius: 0 12px 12px 0;
+                max-width: 80vw;
+                width: 400px;
+            }
+
+            vaul-drawer[direction="right"] vaul-drawer-content {
+                border-radius: 12px 0 0 12px;
+                max-width: 80vw;
+                width: 400px;
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Directional Drawers</h1>
+                <p class="text-gray-600">Drawers that slide in from all four directions</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Bottom Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="bottom">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ⬆️ Bottom Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-content class="p-6">
+                            <div class="space-y-4">
+                                <h2 class="text-xl font-bold text-gray-900">Bottom Drawer</h2>
+                                <p class="text-gray-600">This drawer slides up from the bottom of the screen.</p>
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <h3 class="font-semibold text-blue-800 mb-2">Features:</h3>
+                                    <ul class="text-sm text-blue-700 space-y-1">
+                                        <li>• Slides up from bottom</li>
+                                        <li>• Rounded top corners</li>
+                                        <li>• Drag handle for mobile</li>
+                                        <li>• Keyboard accessible</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-content>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Top Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="top">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ⬇️ Top Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-content class="p-6">
+                            <div class="space-y-4">
+                                <h2 class="text-xl font-bold text-gray-900">Top Drawer</h2>
+                                <p class="text-gray-600">This drawer slides down from the top of the screen.</p>
+                                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <h3 class="font-semibold text-green-800 mb-2">Features:</h3>
+                                    <ul class="text-sm text-green-700 space-y-1">
+                                        <li>• Slides down from top</li>
+                                        <li>• Rounded bottom corners</li>
+                                        <li>• Great for notifications</li>
+                                        <li>• Swipe to dismiss</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </vaul-drawer-content>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Left Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="left">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ➡️ Left Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-content class="p-6">
+                            <div class="space-y-4">
+                                <h2 class="text-xl font-bold text-gray-900">Left Drawer</h2>
+                                <p class="text-gray-600">This drawer slides in from the left side of the screen.</p>
+                                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                                    <h3 class="font-semibold text-purple-800 mb-2">Features:</h3>
+                                    <ul class="text-sm text-purple-700 space-y-1">
+                                        <li>• Slides in from left</li>
+                                        <li>• Rounded right corners</li>
+                                        <li>• Perfect for navigation</li>
+                                        <li>• Responsive width</li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-2">
+                                    <button
+                                        class="w-full px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition-colors"
+                                    >
+                                        Menu Item 1
+                                    </button>
+                                    <button
+                                        class="w-full px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition-colors"
+                                    >
+                                        Menu Item 2
+                                    </button>
+                                    <button
+                                        class="w-full px-4 py-2 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded-lg transition-colors"
+                                    >
+                                        Menu Item 3
+                                    </button>
+                                </div>
+                            </div>
+                        </vaul-drawer-content>
+                    </vaul-drawer>
+                </div>
+
+                <!-- Right Drawer -->
+                <div class="bg-white rounded-lg shadow-md p-6 text-center">
+                    <vaul-drawer direction="right">
+                        <vaul-drawer-trigger>
+                            <button
+                                class="w-full px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                ⬅️ Right Drawer
+                            </button>
+                        </vaul-drawer-trigger>
+                        <vaul-drawer-content class="p-6">
+                            <div class="space-y-4">
+                                <h2 class="text-xl font-bold text-gray-900">Right Drawer</h2>
+                                <p class="text-gray-600">This drawer slides in from the right side of the screen.</p>
+                                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                    <h3 class="font-semibold text-orange-800 mb-2">Features:</h3>
+                                    <ul class="text-sm text-orange-700 space-y-1">
+                                        <li>• Slides in from right</li>
+                                        <li>• Rounded left corners</li>
+                                        <li>• Great for settings</li>
+                                        <li>• Touch-friendly</li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-700">Notifications</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" checked />
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"
+                                            ></div>
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-700">Dark mode</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" class="sr-only peer" />
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"
+                                            ></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </vaul-drawer-content>
+                    </vaul-drawer>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center">
+                <p class="text-sm text-gray-500">
+                    Built with
+                    <a
+                        href="https://www.npmjs.com/package/vaul-web-component"
+                        class="text-blue-600 hover:text-blue-800 underline"
+                        target="_blank"
+                    >
+                        Vaul Web Component
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <script type="module">
+            // Import Vaul Web Component from esm.sh
+            import "https://esm.sh/vaul-web-component@0.1.0";
+
+            // Log events for debugging
+            document.addEventListener("DOMContentLoaded", function () {
+                const drawers = document.querySelectorAll("vaul-drawer");
+
+                drawers.forEach(drawer => {
+                    const direction = drawer.getAttribute("direction");
+
+                    drawer.addEventListener("drawer-open", function () {
+                        console.log(`${direction} drawer opened`);
+                    });
+
+                    drawer.addEventListener("drawer-close", function () {
+                        console.log(`${direction} drawer closed`);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

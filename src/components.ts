@@ -188,10 +188,16 @@ export class VaulDrawerPortal extends HTMLElement {
     #drawer?: VaulDrawer;
     dialog!: HTMLDialogElement;
     #showHandle = signal<boolean>(true);
+    #direction = signal<Direction>("bottom");
     #builtInHandle!: HTMLElement;
     #effectCleanups: (() => void)[] = [];
     #scrollManager!: ScrollManager;
     #gestureManager!: GestureManager;
+
+    #isHorizontal = computed(() => {
+        const direction = this.#direction.value;
+        return direction === "left" || direction === "right";
+    });
 
     private static attributeConfigs = [attr.boolean("show-handle", true)] as const;
     private static parsers = createParsersFromConfig(VaulDrawerPortal.attributeConfigs);
@@ -199,6 +205,10 @@ export class VaulDrawerPortal extends HTMLElement {
     // === Web Component Lifecycle ===
     constructor() {
         super();
+    }
+
+    handleTouchMove(event: TouchEvent): void {
+        this.#gestureManager.handleTouchMove(event);
     }
 
     connectedCallback() {
@@ -264,17 +274,22 @@ export class VaulDrawerPortal extends HTMLElement {
 
     #bindDrawerAttributes() {
         if (!this.#drawer) return;
+        const hasCustomHandle = !!this.querySelector("vaul-drawer-handle");
         this.#effectCleanups.push(
             effect(() => this.dialog.setAttribute("data-direction", this.#drawer!.direction)),
-            effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed")),
-            effect(() => {
-                const direction = this.#drawer!.direction;
-                const isVertical = direction === "top" || direction === "bottom";
-                const showHandle = this.#showHandle.value && isVertical && !this.querySelector("vaul-drawer-handle");
-
-                this.#builtInHandle.setAttribute("data-show", showHandle ? "true" : "false");
-            })
+            effect(() => this.dialog.setAttribute("data-state", this.#drawer!.open ? "open" : "closed"))
         );
+        if (hasCustomHandle) {
+            this.#builtInHandle.setAttribute("data-show", "false");
+        } else {
+            this.#effectCleanups.push(
+                effect(() => {
+                    let showHandle = this.#showHandle.value;
+                    if (this.#isHorizontal.value) showHandle = false;
+                    this.#builtInHandle.setAttribute("data-show", `${showHandle}`);
+                })
+            );
+        }
     }
 
     #setupAnimationListeners() {
@@ -331,7 +346,10 @@ export class VaulDrawerPortal extends HTMLElement {
         });
 
         const propsWatchers = [
-            this.#drawer.watch("direction", direction => (this.#gestureManager.direction = direction)),
+            this.#drawer.watch("direction", direction => {
+                this.#direction.value = direction;
+                this.#gestureManager.direction = direction;
+            }),
             this.#drawer.watch("dismissible", dismissible => (this.#gestureManager.dismissible = dismissible)),
             this.#drawer.watch(
                 "velocityThreshold",
@@ -463,8 +481,8 @@ export class VaulDrawerPortal extends HTMLElement {
         this.#gestureManager.handlePointerUp(syntheticEvent);
     };
 
-    handleTouchMove(event: TouchEvent): void {
-        this.#gestureManager.handleTouchMove(event);
+    set showHandle(value: boolean) {
+        this.#showHandle.value = value;
     }
 }
 
